@@ -1,0 +1,187 @@
+# Panel settings
+panelColor: '#695acd'
+panelTitle: 'Support Tickets'
+panelDescription: '> Select a category from the dropdown menu below to create a support ticket.'
+dropdownPlaceholder: 'Select ticket category'
+
+# TicketCategories
+ticketCategories:
+  - label: 'General Support'
+    channelName: 'support-<username>'
+    value: 'general'
+    description: 'General questions and issues'
+    emoji: '❓'
+    questions:
+      - label: 'Describe your issue'
+        placeholder: 'Please provide details about your general inquiry'
+        required: true
+        answerType: 'paragraph'
+
+  - label: 'Reddit Support'
+    channelName: 'reddit-<username>'
+    value: 'reddit'
+    description: 'Get help with Reddit-related issues'
+    emoji: '❓'
+#   pingRole: 'YOUR_REDDIT_SUPPORT_ROLE_ID'
+    questions:
+      - label: 'Reddit Username'
+        placeholder: 'Enter your Reddit username'
+        required: true
+        answerType: 'short'
+      - label: 'Issue Type'
+        placeholder: 'e.g., Post not showing, Flair issues, etc.'
+        required: true
+        answerType: 'short'
+      - label: 'Issue Description'
+        placeholder: 'Please provide details about your Reddit-related issue'
+        required: true
+        answerType: 'paragraph'
+      - label: 'Links'
+        placeholder: 'Provide any relevant Reddit post/comment links'
+        required: false
+        answerType: 'paragraph'
+
+  - label: 'Whitelist Application'
+    channelName: 'whitelist-<username>'
+    value: 'whitelist'
+    description: 'Apply to join our whitelisted Minecraft server'
+    emoji: '📝'
+    questions:
+      - label: 'Minecraft Username'
+        placeholder: 'Enter your Minecraft username'
+        required: true
+        answerType: 'short'
+      - label: 'Age'
+        placeholder: 'How old are you?'
+        required: true
+        answerType: 'short'
+      - label: 'Experience'
+        placeholder: 'How long have you been playing Minecraft?'
+        required: true
+        answerType: 'short'
+      - label: 'Why do you want to join?'
+        placeholder: "Tell us why you'd like to join our server"
+        required: true
+        answerType: 'paragraph'
+      - label: 'Additional information'
+        placeholder: "Any other details you'd like to share?"
+        required: false
+        answerType: 'paragraph'
+
+  - label: 'Bug Report'
+    channelName: 'bug-report-<username>'
+    value: 'bug-report'
+    description: 'Report technical issues with the bot or Minecraft'
+    emoji: '🐞'
+    questions:
+      - label: 'Minecraft Username'
+        placeholder: 'Enter your Minecraft username'
+        required: true
+        answerType: 'short'
+      - label: 'Bug Type'
+        placeholder: 'e.g., Server crash, Plugin issue, Discord bot'
+        required: true
+        answerType: 'short'
+      - label: 'Bug Description'
+        placeholder: 'Please provide detailed steps to reproduce the bug and any additional information'
+        required: true
+        answerType: 'paragraph'
+      - label: 'Screenshots or Videos'
+        placeholder: 'Provide links to screenshots or videos showcasing the bug (Use imgur)'
+        required: false
+        answerType: 'short'
+
+  - label: 'Billing Issues'
+    channelName: 'billing-<username>'
+    value: 'billing'
+    description: 'Report and resolve billing-related problems'
+    emoji: '💰'
+    questions:
+      - label: 'Minecraft Username'
+        placeholder: 'Enter your Minecraft username'
+        required: true
+        answerType: 'short'
+      - label: 'Transaction ID'
+        placeholder: 'If applicable, enter the transaction ID'
+        required: false
+        answerType: 'short'
+      - label: 'Issue Type'
+        placeholder: 'e.g., Failed payment, Incorrect charge, Refund request'
+        required: true
+        answerType: 'short'
+      - label: 'Issue Description'
+        placeholder: 'Please provide details about your billing issue'
+        required: true
+        answerType: 'paragraph'
+
+  - label: 'Report a User'
+    channelName: 'report-<username>'
+    value: 'report'
+    description: 'Report a user for breaking server rules'
+    emoji: '🚨'
+    questions:
+      - label: 'Your Minecraft / Discord Username'
+        placeholder: 'Enter your Minecraft / Discord username'
+        required: true
+        answerType: 'short'
+      - label: 'Reported User'
+        placeholder: "Enter the Minecraft / Discord username of the user you're reporting"
+        required: true
+        answerType: 'short'
+      - label: 'Reason for Report'
+        placeholder: 'e.g., Griefing, Harassment, Cheating'
+        required: true
+        answerType: 'short'
+      - label: 'Description'
+        placeholder: 'Provide details about the incident. Include date/time if possible'
+        required: true
+        answerType: 'paragraph'
+      - label: 'Evidence'
+        placeholder: 'Do you have screenshots or video evidence? If yes, please provide links'
+        required: false
+        answerType: 'paragraph'
+
+  - label: 'Moderator Application'
+    channelName: 'mod-application-<username>'
+    value: 'modapplication'
+    description: 'Apply to become a server moderator'
+    emoji: '🛡️'
+    questions:
+      - label: 'Minecraft Username'
+        placeholder: 'Enter your Minecraft username'
+        required: true
+        answerType: 'short'
+      - label: 'Why do you want to become a mod?'
+        placeholder: 'Tell us why you want to become a moderator'
+        required: true
+        answerType: 'paragraph'
+      - label: 'What makes you a good moderator?'
+        placeholder: 'Describe what qualities make you suitable for moderation'
+        required: true
+        answerType: 'paragraph'
+
+# Ticket settings
+transcriptFooter: 'MCBuddies'
+
+# Messages
+messages:
+  ticketCreated: 'Your ticket has been created. A support team member will be with you shortly.'
+  ticketClosed: 'This ticket has been closed. Thank you for using our support system.'
+  ticketClosedBy: '{user} has closed this ticket.'
+  userAdded: '{user} has been added to the ticket.'
+  userRemoved: '{user} has been removed from the ticket.'
+  transcriptCreated: 'A transcript of this ticket has been created and saved.'
+  noPermission: 'You do not have permission to use this command.'
+  invalidCategory: 'Invalid ticket category selected.'
+  ticketClosing: 'This ticket will be closed in 5 seconds.'
+  ticketCreatorLeft: "{user} has left the server. This ticket may be closed if no longer needed."
+  ticketLimitReached: "You have reached the maximum number of open tickets. Please close some of your existing tickets before opening a new one."
+  whitelistAccepted: "Your whitelist application has been accepted! Welcome to the server! 🎉"
+  whitelistAcceotedServerCommand: "whitelist add "
+  whitelistAcceptedTicket: "Hey {user}, welcome! :pray: \n\nI have edited your perms a new channel should have opened up for you.\n#how-to-join - this one has all the info you need to be able to connect to the server. \n\nOnce you log in and link (which is generated in-game by the link command when you join the server) you'll have another bunch of channels open up.\n \nOne of them is the #resources channel, which  has a list of useful resources like:\n- Public farm information and user guides\n- The blue map\n- A list of the data packs and plugins we use which slightly modify the base game. \n\nFeel free to leave this ticket open until you're safely on the server, and you're welcome to ping us here if you run into any issues. \n\nHave fun! Look forward to seeing you online!"
+  whitelistDenied:
+    age: "Your application has been denied due to not meeting our age requirements."
+    immature: "Your application has been denied as we feel your application doesn't show the maturity level we're looking for."
+    profile: "Your application has been denied based on your profile history/activity."
+    username: "Your application has been denied due to an incorrect or invalid username format."
+    other: "Your application has been denied: {reason}"

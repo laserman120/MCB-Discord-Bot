@@ -1,0 +1,16 @@
+{
+  "name": "mcb-botmanager",
+  "version": "1.0.0",
+  "description": "A handler and manager to control and run several discord bots",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "GLaD0S",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.22.1",
+    "mongodb": "^6.20.0",
+    "mongoose": "^8.18.2"
+  }
+}

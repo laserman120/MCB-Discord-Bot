@@ -1,0 +1,81 @@
+# Warning Settings
+warnings:
+  reasons:
+    - 
+      title: "Advertising"
+      description: "You are only allowed to advertise in #looking-to-play or use /ad"
+      emoji: "📢"
+    - 
+      title: "NSFW Content"
+      description: "Inappropriate or explicit content"
+      emoji: "🔞"
+    - 
+      title: "Self-Promotion"
+      description: "Unauthorized advertising or promotion"
+      emoji: "📢"
+    - 
+      title: "Offensive Language"
+      description: "Use of inappropriate or offensive language"
+      emoji: "🚫"
+    - 
+      title: "Other"
+      description: "Custom warning reason"
+      emoji: "❓"
+
+# Ban Settings
+ban:
+  reasons:
+    - 
+      title: "Severe Harassment"
+      description: "Repeated or severe harassment of other users"
+      emoji: "⚠️"
+    - 
+      title: "Malicious Behavior"
+      description: "Intentional disruption or harm to the server"
+      emoji: "💢"
+    - 
+      title: "Ban Evasion"
+      description: "Attempting to bypass a previous ban"
+      emoji: "🚫"
+    - 
+      title: "Illegal Content"
+      description: "Sharing or promoting illegal content"
+      emoji: "⚖️"
+    - 
+      title: "Extreme Toxicity"
+      description: "Extremely toxic behavior affecting the community"
+      emoji: "☢️"
+    - 
+      title: "Other"
+      description: "Custom ban reason"
+      emoji: "❓"
+
+# Mute Settings
+mute: 
+  reasons:
+    - 
+      title: "Spam"
+      description: "Excessive or repetitive messages that disrupt chat"
+      emoji: "🔁"
+    - 
+      title: "Harassment"
+      description: "Targeted negative behavior towards other users"
+      emoji: "⚠️"
+    - 
+      title: "NSFW Content"
+      description: "Inappropriate or explicit content"
+      emoji: "🔞"
+    - 
+      title: "Self-Promotion"
+      description: "Unauthorized advertising or promotion"
+      emoji: "📢"
+    - 
+      title: "Offensive Language"
+      description: "Use of inappropriate or offensive language"
+      emoji: "🚫"
+    - 
+      title: "Other"
+      description: "Custom mute reason"
+      emoji: "❓"
+
+
