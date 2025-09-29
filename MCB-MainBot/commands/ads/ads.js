@@ -6,7 +6,7 @@ module.exports = {
         .setName('ads')
         .setDescription('View information about the advertisement system'),
 
-    async execute(interaction, client, config) {
+    async execute(interaction, client) {
         try {
             const serverSettings = await ServerSettings.findOne({ 
                 guildId: interaction.guild.id 
@@ -17,15 +17,15 @@ module.exports = {
                 'No ads posted yet';
 
             const embed = new EmbedBuilder()
-                .setColor(config.embeds.mainColor)
+                .setColor(client.config.embeds.mainColor)
                 .setTitle('Advertisement System')
                 .setDescription('Post your advertisements to promote your Minecraft content!')
                 .addFields(
-                    { name: 'Cost', value: `${config.ads.cost} points per advertisement` },
-                    { name: 'Cooldown', value: `${config.ads.cooldown / 3600} hour(s)` },
-                    { name: 'Maximum Length', value: `${config.ads.max_length} characters` },
+                    { name: 'Cost', value: `${client.config.ads.cost} points per advertisement` },
+                    { name: 'Cooldown', value: `${client.config.ads.userCooldown / 3600} hour(s)` },
+                    { name: 'Maximum Length', value: `${client.config.ads.max_length} characters` },
                     { name: 'Status', value: lastAdTime },
-                    { name: 'Rules', value: config.ads.rules }
+                    { name: 'Rules', value: client.config.ads.rules }
                 )
                 .setFooter({ text: 'Use /ad to create an advertisement' });
 

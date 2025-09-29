@@ -1,69 +1,8 @@
-
-
 # Embed stuff
 embeds:
  mainColor: '#695acd'
  acceptedEmbed: '#5ae85f'
  deniedEmbed: '#ff0a1f'
-
-########################################
-#              Ad System               #
-########################################
-
-ads:
- cost: 2  # Points required to post an ad
- userCooldown: 3600  # Individual user cooldown in seconds (1 hour)
- globalCooldown: 300 # Global cooldown in seconds (5 minutes)
- max_length: 500  # Maximum character length for ads
- rules: |
-   1. No inappropriate content
-   2. No spamming
-   3. Relate to Minecraft only
-   4. No external links
-   5. No named servers
-   6. No links to other discord servers
- adChannels:
- - "CHANNEL_ID_HERE"
- - "CHANNEL_ID_HERE"
-
-########################################
-#            Point System              #
-########################################
-
-points:
- message_chance: 0.05  # 5% chance to earn a point per message
- message_cooldown: 60  # Cooldown in seconds between point earnings (1 minute)
- daily_amount: 2  # Points earned from daily command
- streak_bonusMin: 1 # The min points they get from a streak
- streak_bonusMax: 5  # Additional points earned per day of streak
- streakBoosterBonusMin: 1 # Min extra you can get from being a server booster
- streakBoosterBonusMax: 5 # Max you can get when being a server booster
-
-########################################
-#          Moderation Tools            #
-########################################
-
-moderation:
- muted_role_id: "MUTED_ROLE_ID_HERE"
- warning_expiry: 604800  # Warning expiry time in seconds (7 days)
- max_warnings: 3  # Number of warnings before mute
-
-########################################
-#               Logging                #
-########################################
-
-logging:
- channel_id: "CHANNEL_ID_HERE"
- threads:
-   edited: "THREAD_ID_HERE"
-   warnings: "THREAD_ID_HERE"
-   deleted: "THREAD_ID_HERE"
- messageEdited: true
- messageDeleted: true
- nuke: true
- warningIssued: true
- warningExpired: true
- warningRemoved: true
 
 ########################################
 #              Messages                #
@@ -79,42 +18,13 @@ messages:
  nuke_success: "Successfully deleted {count} messages in this channel."
 
 ########################################
-#            Leaderboard               #
-########################################
-
-leaderboard:
- update_interval: 300  # Update leaderboard every 5 minutes
- display_limit: 10  
-
-########################################
 #             Suggestions              #
 ########################################
 
 suggestion:
- suggestionID: "CHANNEL_ID_HERE" 
  autoAcceptAmount: 10 
  autoDenyAmount: 10 
  upvoteEmoji: "👍"
  downvoteEmoji: "👎"
  deniedColor: "#f91536"
  acceptedColor: "#23b955"
- suggestionRole: "ROLE_ID_HERE"
- 
-########################################
-#             Bot Status               #
-########################################
-
-botStatus:
-  status: "WATCHING" 
-  refreshTime: 300 # How often the status updates in seconds
-  statusText: 
-   - "{users} users"
-
-########################################
-#         Introductions               #
-########################################
-
-introduction:
-  channelId: "CHANNEL_ID_HERE"
-  embedColor: "#fd5e96"
-  threadDuration: 1440  

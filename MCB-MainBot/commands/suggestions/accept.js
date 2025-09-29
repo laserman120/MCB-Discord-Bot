@@ -12,7 +12,7 @@ module.exports = {
                 .setRequired(false))
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
 
-    async execute(interaction, client, config) {
+    async execute(interaction, client) {
         // Defer the reply immediately
         await interaction.deferReply({ ephemeral: true });
 
@@ -38,12 +38,12 @@ module.exports = {
             const reason = interaction.options.getString('reason') || 'No reason provided';
 
             // Get the original message and update its embed
-            const suggestionChannel = await client.channels.fetch(config.suggestion.suggestionID);
+            const suggestionChannel = await client.channels.fetch(client.config.channels.suggestionChannel);
             const originalMessage = await suggestionChannel.messages.fetch(suggestion.messageId);
             const originalEmbed = originalMessage.embeds[0];
 
             const updatedEmbed = EmbedBuilder.from(originalEmbed)
-                .setColor(config.embeds.acceptedEmbed)
+                .setColor(client.config.embeds.acceptedEmbed)
                 .addFields({ 
                     name: 'Status', 
                     value: `✅ Accepted by ${interaction.member.toString()}\nReason: ${reason}` 
@@ -54,7 +54,7 @@ module.exports = {
             // DM the suggester
             const suggester = await client.users.fetch(suggestion.userId);
             const dmEmbed = new EmbedBuilder()
-                .setColor(config.embeds.acceptedEmbed)
+                .setColor(client.config.embeds.acceptedEmbed)
                 .setTitle('Suggestion Accepted!')
                 .setDescription(`Your suggestion has been accepted!`)
                 .addFields(

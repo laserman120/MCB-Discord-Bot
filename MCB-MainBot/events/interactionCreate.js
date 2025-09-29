@@ -22,20 +22,20 @@ module.exports = {
             // Handle introduction button
             if (interaction.isButton() && interaction.customId === 'create_intro') {
                 console.log('Introduction button clicked by:', interaction.user.tag);
-                await handleIntroButton(interaction, client, config);
+                await handleIntroButton(interaction, client, client.config);
                 return;
             }
 
             // Handle introduction modal submit
             if (interaction.isModalSubmit() && interaction.customId === 'intro_modal') {
                 console.log('Introduction modal submitted by:', interaction.user.tag);
-                await handleIntroSubmit(interaction, client, config);
+                await handleIntroSubmit(interaction, client, client.config);
                 return;
             }
 
             // Handle suggestion modal submit
             if (interaction.isModalSubmit() && interaction.customId === 'suggestion-modal') {
-                await handleSuggestionSubmit(interaction, client, config);
+                await handleSuggestionSubmit(interaction, client, client.config);
                 return;
             }
 
@@ -45,7 +45,7 @@ module.exports = {
                 if (!command) return;
 
                 try {
-                    await command.execute(interaction, client, config);
+                    await command.execute(interaction, client, client.config);
                 } catch (error) {
                     console.error('Error executing command:', error);
                     const reply = {
@@ -117,11 +117,11 @@ module.exports = {
                     const reason = interaction.fields.getTextInputValue('report-reason');
 
                     try {
-                        const modChannel = await interaction.guild.channels.fetch(config.logging.channel_id);
+                        const modChannel = await interaction.guild.channels.fetch(client.config.channels.loggingChannel);
                         if (modChannel) {
                             await modChannel.send({
                                 embeds: [{
-                                    color: parseInt(config.embeds.deniedEmbed.replace('#', ''), 16),
+                                    color: parseInt(client.config.embeds.deniedEmbed.replace('#', ''), 16),
                                     title: '🚨 Advertisement Reported',
                                     fields: [
                                         {

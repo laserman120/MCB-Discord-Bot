@@ -17,7 +17,7 @@ module.exports = {
         }
 
         // Get message ID from config if you're tracking specific messages
-        if (!config.reactionroles.message_ids.includes(reaction.message.id)) {
+        if (!client.config.reactionroles.message_ids.includes(reaction.message.id)) {
             return;
         }
 
@@ -33,7 +33,7 @@ module.exports = {
         });
 
         // Find the matching role configuration
-        const roleConfig = config.reactionroles.roles.find(r => {
+        const roleConfig = client.config.reactionroles.roles.find(r => {
             const configEmoji = r.emoji;
             return configEmoji === emojiIdentifier || configEmoji === reaction.emoji.name;
         });

@@ -6,12 +6,12 @@ module.exports = {
         .setName('daily')
         .setDescription('Collect your daily points'),
 
-    async execute(interaction, client, config) {
+    async execute(interaction, client) {
         try {
             // Check if command is used in the correct channel
-            if (interaction.channelId !== '1288541679040729266') {
+            if (interaction.channelId !== client.config.channels.botCommandChannel) {
                 return interaction.reply({
-                    content: `❌ This command can only be used in <#1288541679040729266>!`,
+                    content: `❌ This command can only be used in <#${client.config.channels.botCommandChannel}>!`,
                     ephemeral: true
                 });
             }
@@ -48,7 +48,7 @@ module.exports = {
             }
 
             // Calculate base points (random amount from config)
-            let pointsEarned = config.points.daily_amount;
+            let pointsEarned = client.config.points.daily_amount;
 
             // Calculate streak bonus
             let streakBonus = 0;
@@ -56,8 +56,8 @@ module.exports = {
                 // Streak continues
                 user.dailyStreak++;
                 streakBonus = Math.floor(Math.random() * 
-                    (config.points.streak_bonusMax - config.points.streak_bonusMin + 1)) + 
-                    config.points.streak_bonusMin;
+                    (client.config.points.streak_bonusMax - client.config.points.streak_bonusMin + 1)) + 
+                    client.config.points.streak_bonusMin;
             } else {
                 // Streak resets
                 user.dailyStreak = 1;
@@ -67,8 +67,8 @@ module.exports = {
             let boosterBonus = 0;
             if (isBooster) {
                 boosterBonus = Math.floor(Math.random() * 
-                    (config.points.streakBoosterBonusMax - config.points.streakBoosterBonusMin + 1)) + 
-                    config.points.streakBoosterBonusMin;
+                    (client.config.points.streakBoosterBonusMax - client.config.points.streakBoosterBonusMin + 1)) + 
+                    client.config.points.streakBoosterBonusMin;
             }
 
             // Update user points and last daily
@@ -79,7 +79,7 @@ module.exports = {
 
             // Create embed for response
             const embed = new EmbedBuilder()
-                .setColor(config.embeds.mainColor)
+                .setColor(client.config.embeds.mainColor)
                 .setTitle('Daily Points Claimed! 🎉')
                 .setDescription(`Base Points: \`${pointsEarned}\`\nBalance: \`${user.points}\`${boosterBonus > 0 ? `\n\n:tada: Since you're a booster you have gained an extra ${boosterBonus} points` : ''}`);
 
@@ -98,7 +98,7 @@ module.exports = {
             // If user is a booster, announce it
             if (isBooster) {
                 const boosterEmbed = new EmbedBuilder()
-                    .setColor(config.embeds.mainColor)
+                    .setColor(client.config.embeds.mainColor)
                     .setTitle('🚀 Server Booster Reward!')
                     .setDescription(`${interaction.user} just claimed their daily points and got a bonus **${boosterBonus} points** for being an awesome Server Booster!`)
                     .setTimestamp();
@@ -109,7 +109,7 @@ module.exports = {
             // If user has a streak of 2 or more, announce it to everyone
             if (user.dailyStreak >= 2) {
                 const streakEmbed = new EmbedBuilder()
-                    .setColor(config.embeds.mainColor)
+                    .setColor(client.config.embeds.mainColor)
                     .setDescription(`🔥 ${interaction.user} is on a ${user.dailyStreak} day streak! Do \`/daily\` to join them!`);
 
                 await interaction.channel.send({ embeds: [streakEmbed] });

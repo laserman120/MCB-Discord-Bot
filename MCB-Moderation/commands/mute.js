@@ -51,7 +51,7 @@ async function execute(interaction, client) {
 
     // Create reason selection menu
     const selectMenu = new StringSelectMenuBuilder()
-        .setCustomId('mute_reason')
+        .setCustomId(`mute_reason_${targetUser.id}_${duration}`)
         .setPlaceholder('Select a reason for the mute')
         .addOptions(
             client.config.mute.reasons.map(reason => ({

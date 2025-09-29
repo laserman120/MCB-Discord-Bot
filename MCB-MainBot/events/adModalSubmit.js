@@ -4,7 +4,7 @@ const User = require('../models/User');
 
 module.exports = {
     name: 'interactionCreate',
-    async execute(interaction, client, config) {
+    async execute(interaction, client) {
         if (!interaction.isModalSubmit()) return;
         if (interaction.customId !== 'ad-modal') return;
 
@@ -15,9 +15,9 @@ module.exports = {
                 guildId: interaction.guild.id 
             });
 
-            if (!user || user.points < config.ads.cost) {
+            if (!user || user.points < client.config.ads.cost) {
                 return interaction.reply({
-                    content: `You need ${config.ads.cost} points to post an advertisement.`,
+                    content: `You need ${client.config.ads.cost} points to post an advertisement.`,
                     ephemeral: true
                 });
             }
@@ -28,8 +28,8 @@ module.exports = {
                 guildId: interaction.guild.id
             }).sort({ timestamp: -1 });
 
-            if (lastAd && (Date.now() - lastAd.timestamp) < (config.ads.cooldown * 1000)) {
-                const timeLeft = Math.ceil((config.ads.cooldown * 1000 - (Date.now() - lastAd.timestamp)) / 1000 / 60);
+            if (lastAd && (Date.now() - lastAd.timestamp) < (client.config.ads.cooldown * 1000)) {
+                const timeLeft = Math.ceil((client.config.ads.cooldown * 1000 - (Date.now() - lastAd.timestamp)) / 1000 / 60);
                 return interaction.reply({
                     content: `Please wait ${timeLeft} minutes before posting another advertisement.`,
                     ephemeral: true
@@ -43,17 +43,17 @@ module.exports = {
                 userId: interaction.user.id,
                 guildId: interaction.guild.id,
                 content: adContent,
-                cost: config.ads.cost
+                cost: client.config.ads.cost
             });
             await newAd.save();
 
             // Deduct points
-            user.points -= config.ads.cost;
+            user.points -= client.config.ads.cost;
             await user.save();
 
             // Create and send the ad embed
             const adEmbed = new EmbedBuilder()
-                .setColor(config.embeds.mainColor)
+                .setColor(client.config.embeds.mainColor)
                 .setAuthor({ 
                     name: interaction.user.tag, 
                     iconURL: interaction.user.displayAvatarURL() 
@@ -62,7 +62,7 @@ module.exports = {
                 .setTimestamp();
 
             await interaction.reply({ 
-                content: config.messages.ad_posted.replace('{balance}', user.points),
+                content: client.config.messages.ad_posted.replace('{balance}', user.points),
                 embeds: [adEmbed] 
             });
 

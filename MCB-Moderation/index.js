@@ -9,37 +9,33 @@ function initialize(client, config) {
     process.on('uncaughtException', error => console.error('Uncaught exception:', error));
 
 
-    console.log('Moderation-Bot module initialized');
+    console.log('   - Moderation-Bot module initialized');
 }
 
 async function handleInteraction(interaction, client) {
     // --- String Select Menu Interactions ---
     if (interaction.isStringSelectMenu()) {
-        if (interaction.customId === 'ban_reason') {
+        if (interaction.customId.startsWith("ban_reason_")) {
             const banCommand = client.commands.get('ban');
-            if (banCommand && banCommand.handleBan && interaction.message?.embeds[0]?.description) {
-                const match = interaction.message.embeds[0].description.match(/<@!?(\d+)>/);
-                if (match && match[1]) {
-                    const targetUser = { id: match[1] }; // Create a user-like object
-                    await banCommand.handleBan(interaction, targetUser, interaction.values[0]);
-                }
+
+            // Extract the ID directly from the customId string
+            const targetUserId = interaction.customId.split('_')[2];
+
+            if (banCommand && banCommand.handleBan && targetUserId) {
+                const targetUser = { id: targetUserId };
+                await banCommand.handleBan(interaction, client, targetUser, interaction.values[0]);
             }
-            return true; // Signal that the interaction was handled
+            return true;
         }
 
-        if (interaction.customId === 'mute_reason') {
+        if (interaction.customId.startsWith("mute_reason_")) {
             const muteCommand = client.commands.get('mute');
-            if (muteCommand && muteCommand.handleMute && interaction.message?.embeds[0]?.description) {
-                const match = interaction.message.embeds[0].description.match(/\((\d+)\)/);
-                if (match && match[1]) {
-                    const targetUser = await client.users.fetch(match[1]);
-                    const durationField = interaction.message.embeds[0].fields.find(f => f.name === 'Duration');
-                    // Ensure durationField exists before trying to parse
-                    if (durationField) {
-                        const duration = parseInt(durationField.value);
-                        await muteCommand.handleMute(interaction, client, targetUser, interaction.values[0], duration);
-                    }
-                }
+
+            const targetUserId = interaction.customId.split('_')[2];
+            const duration = interaction.customId.split('_')[3];
+            if (muteCommand && muteCommand.handleMute && targetUserId && duration) {
+                const targetUser = { id: targetUserId };
+                await muteCommand.handleMute(interaction, client, targetUser, interaction.values[0], duration);
             }
             return true; // Signal that the interaction was handled
         }

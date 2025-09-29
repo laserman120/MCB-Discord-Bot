@@ -55,12 +55,12 @@ async function handleWarning(interaction, client, targetUser, reason) {
         .setColor('#FF0000')
         .setTitle(`You got a warning in ${interaction.guild.name}`)
         .setDescription(`Warned By: <@${interaction.user.id}>
-Reason:
-\`\`\`
-${reason.title}${reason.description ? `\n${reason.description}` : ''}
-\`\`\`
-Date: <t:${Math.floor(timestamp / 1000)}:F>
-Expire: <t:${Math.floor((timestamp + (client.config.moderationSystem.warningSettings.warningExpirationDays * 24 * 60 * 60 * 1000)) / 1000)}:F>`)
+                        Reason:
+                        \`\`\`
+                        ${reason.title}${reason.description ? `\n${reason.description}` : ''}
+                        \`\`\`
+                        Date: <t:${Math.floor(timestamp / 1000)}:F>
+                        Expire: <t:${Math.floor((timestamp + (client.config.moderationSystem.warningSettings.warningExpirationDays * 24 * 60 * 60 * 1000)) / 1000)}:F>`)
         .setTimestamp();
 
     let dmSent = false;
@@ -73,6 +73,12 @@ Expire: <t:${Math.floor((timestamp + (client.config.moderationSystem.warningSett
         console.log(`Could not send warning DM to ${targetUser.tag}: ${error.message}`);
     }
 
+    warningEmbed.addFields({
+        name: 'DM Sent to User',
+        value: dmSent ? '✅ Yes' : '❌ No (User may have DMs disabled or has blocked the bot)',
+        inline: true
+    });
+
     // If user should be muted, apply the mute
     if (shouldMute) {
         try {
@@ -80,10 +86,41 @@ Expire: <t:${Math.floor((timestamp + (client.config.moderationSystem.warningSett
             const member = await interaction.guild.members.fetch(targetUser.id);
 
             // Fetch the mute role first
-            const muteRole = await interaction.guild.roles.fetch(client.config.roles.mutedRoleId);
+            const muteRole = await interaction.guild.roles.cache.get(client.config.roles.muteRoleId);
 
             if (!muteRole) {
-                throw new Error('Mute role not found');
+                return interaction.editReply({
+                    content: 'Mute role not found. Please check your configuration.',
+                    embeds: [],
+                    components: []
+                });
+            }
+
+            // Check if bot has permission to manage this role
+            const botMember = interaction.guild.members.cache.get(interaction.client.user.id);
+            if (!botMember.permissions.has('ManageRoles')) {
+                return interaction.editReply({
+                    content: 'I do not have permission to manage roles.',
+                    embeds: [],
+                    components: []
+                });
+            }
+
+            // Check role hierarchy
+            if (muteRole.position >= botMember.roles.highest.position) {
+                return interaction.editReply({
+                    content: 'I cannot assign the mute role because it is higher than or equal to my highest role. Please move the mute role below my highest role.',
+                    embeds: [],
+                    components: []
+                });
+            }
+
+            if (member.roles.highest.position >= botMember.roles.highest.position) {
+                return interaction.editReply({
+                    content: 'I cannot mute this user because they have a role higher than or equal to my highest role.',
+                    embeds: [],
+                    components: []
+                });
             }
 
             // Add the muted role

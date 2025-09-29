@@ -71,7 +71,7 @@ const ticketHandler = {
       name: channelName,
       type: ChannelType.GuildText,
       parent: config.categories.ticketCategory,
-      topic: `${interaction.user.username} | ${Date.now()}`, // Store creator ID and creation time
+      topic: `${interaction.user.id} | ${Date.now()}`, // Store creator ID and creation time
       permissionOverwrites: [
         {
           id: interaction.guild.id,

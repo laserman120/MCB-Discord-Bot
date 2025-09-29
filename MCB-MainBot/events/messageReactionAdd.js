@@ -12,7 +12,7 @@ module.exports = {
             }
 
             const isReactionRoleMessage = reaction.message.embeds.length > 0 && 
-                reaction.message.embeds[0].title === config.reactionroles.embed.title;
+                reaction.message.embeds[0].title === client.config.reactionroles.embed.title;
 
             if (!isReactionRoleMessage) return;
 
@@ -25,7 +25,7 @@ module.exports = {
             // Remove the user's reaction immediately
             await reaction.users.remove(user);
 
-            const roleConfig = config.reactionroles.roles.find(r => r.emoji === reaction.emoji.name);
+            const roleConfig = client.config.reactionroles.roles.find(r => r.emoji === reaction.emoji.name);
             
             if (!roleConfig) {
                 console.log('No matching role found for emoji:', reaction.emoji.name);
@@ -52,11 +52,11 @@ module.exports = {
             }
 
             // Log the action with proper user mention
-            if (config.logging.channel_id) {
-                const logChannel = await guild.channels.fetch(config.logging.channel_id);
+            if (client.config.channels.loggingChannel) {
+                const logChannel = await guild.channels.fetch(client.config.channels.loggingChannel);
                 if (logChannel) {
                     const logEmbed = new EmbedBuilder()
-                        .setColor(config.embeds.acceptedEmbed)
+                        .setColor(client.config.embeds.acceptedEmbed)
                         .setTitle('Reaction Role Added')
                         .addFields(
                             { name: 'User', value: `<@${user.id}>`, inline: true },

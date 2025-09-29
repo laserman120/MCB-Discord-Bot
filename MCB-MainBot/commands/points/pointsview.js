@@ -11,7 +11,7 @@ module.exports = {
                 .setDescription('The user to check points for')
                 .setRequired(true)),
 
-    async execute(interaction, client, config) {
+    async execute(interaction, client) {
         try {
             const target = interaction.options.getUser('user');
             const user = await User.findOne({ 
@@ -20,7 +20,7 @@ module.exports = {
             }) || { points: 0, dailyStreak: 0 };
 
             const embed = new EmbedBuilder()
-                .setColor(config.embeds.mainColor)
+                .setColor(client.config.embeds.mainColor)
                 .setAuthor({
                     name: target.tag,
                     iconURL: target.displayAvatarURL()

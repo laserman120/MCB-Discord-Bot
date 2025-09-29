@@ -46,7 +46,7 @@ async function execute(interaction, client) {
 
     // Create reason selection menu
     const selectMenu = new StringSelectMenuBuilder()
-        .setCustomId('ban_reason')
+        .setCustomId(`ban_reason_${targetUser.id}`) 
         .setPlaceholder('Select a reason for the ban')
         .addOptions(
             client.config.ban.reasons.map(reason => ({
@@ -66,8 +66,9 @@ async function execute(interaction, client) {
     });
 }
 
-async function handleBan(interaction, targetUser, reason) {
+async function handleBan(interaction, client, targetUser, reason) {
     try {
+        const targetUserTag = targetUser.tag;
         // Ban the user
         await interaction.guild.members.ban(targetUser.id, { reason: reason });
 
@@ -76,7 +77,7 @@ async function handleBan(interaction, targetUser, reason) {
             .setColor('#FF0000')
             .setTitle('User Banned')
             .addFields(
-                { name: 'User banned:', value: `<@${targetUser.id}> (${targetUser.tag})` },
+                { name: 'User banned:', value: `<@${targetUser.id}> (${targetUserTag})` },
                 { name: 'Banned by:', value: `<@${interaction.user.id}>` },
                 { name: 'Reason', value: reason },
                 { name: 'Timestamp', value: `<t:${Math.floor(Date.now() / 1000)}:F>` }
@@ -96,17 +97,19 @@ async function handleBan(interaction, targetUser, reason) {
         await logThread.send({ embeds: [logEmbed] });
 
         // Update interaction
-        await interaction.editReply({
-            content: `Successfully banned ${targetUser.tag}`,
+        await interaction.reply({
+            content: `Successfully banned ${targetUserTag}`,
             embeds: [],
-            components: []
+            components: [],
+            ephemeral: true
         });
     } catch (error) {
         console.error('Error banning user:', error);
-        await interaction.editReply({
+        await interaction.reply({
             content: 'There was an error banning the user. Please try again.',
             embeds: [],
-            components: []
+            components: [],
+            ephemeral: true
         });
     }
 }

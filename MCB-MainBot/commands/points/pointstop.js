@@ -7,11 +7,11 @@ module.exports = {
         .setName('pointstop')
         .setDescription('View the top 10 users with the most points'),
 
-    async execute(interaction, client, config) {
+    async execute(interaction, client) {
         try {
             const topUsers = await User.find({ guildId: interaction.guild.id })
                 .sort({ points: -1 })
-                .limit(config.leaderboard.display_limit);
+                .limit(client.config.leaderboard.display_limit);
             
             if (topUsers.length === 0) {
                 return interaction.reply({
@@ -31,7 +31,7 @@ module.exports = {
             }
 
             const embed = new EmbedBuilder()
-                .setColor(config.embeds.mainColor)
+                .setColor(client.config.embeds.mainColor)
                 .setTitle('🏆 Points Leaderboard')
                 .setDescription(description || 'No valid users found in the leaderboard.')
                 .setTimestamp();

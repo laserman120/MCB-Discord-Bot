@@ -70,7 +70,7 @@ async function handleIntroSubmit(interaction, client, config) {
         const about = interaction.fields.getTextInputValue('about');
 
         const introEmbed = new EmbedBuilder()
-            .setColor(config.introduction?.embedColor ?? '#5865F2')
+            .setColor(client.config.introduction?.embedColor ?? '#5865F2')
             .setTitle(`👋 New Member: ${interaction.user.tag}`)
             .setThumbnail(`https://mc-heads.net/head/${mcUsername}`)
             .addFields(
@@ -86,7 +86,7 @@ async function handleIntroSubmit(interaction, client, config) {
                 iconURL: interaction.guild.iconURL()
             });
 
-        const introChannel = await interaction.guild.channels.fetch(config.introduction.channelId);
+        const introChannel = await interaction.guild.channels.fetch(client.config.channels.introductionChannel);
         if (!introChannel) {
             throw new Error('Introduction channel not configured or not found');
         }
@@ -98,7 +98,7 @@ async function handleIntroSubmit(interaction, client, config) {
 
         const thread = await introMessage.startThread({
             name: `Welcome ${interaction.user.username}!`,
-            autoArchiveDuration: config.introduction?.threadDuration ?? 1440
+            autoArchiveDuration: client.config.introduction?.threadDuration ?? 1440
         });
 
         await thread.send({

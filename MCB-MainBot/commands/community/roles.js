@@ -1,8 +1,8 @@
-const { 
-    SlashCommandBuilder, 
-    EmbedBuilder, 
-    ActionRowBuilder, 
-    ButtonBuilder, 
+const {
+    SlashCommandBuilder,
+    EmbedBuilder,
+    ActionRowBuilder,
+    ButtonBuilder,
     ButtonStyle,
     PermissionFlagsBits
 } = require('discord.js');
@@ -13,61 +13,47 @@ module.exports = {
         .setDescription('Create a role selection panel')
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
 
-    async execute(interaction, client, config) {
+    async execute(interaction, client) {
         try {
             await interaction.deferReply({ ephemeral: true });
 
-            const embed = new EmbedBuilder()
-                .setColor(config?.embeds?.mainColor || '#2B2D31')
-                .setTitle('Role Selection')
-                .setDescription('Click the buttons below to get or remove roles!')
-                .addFields(
-                    { 
-                        name: '✅ Announcements', 
-                        value: 'Get pinged for new announcements',
-                        inline: false
-                    },
-                    { 
-                        name: '✏️ Changelog', 
-                        value: 'Get notified about changelogs',
-                        inline: false
-                    },
-                    { 
-                        name: '✨ Suggestions', 
-                        value: 'Get pinged for new suggestions',
-                        inline: false
-                    }
-                );
+            const roleConfigs = client.config.roles.rolesSelector;
 
-            const buttons = new ActionRowBuilder()
-                .addComponents(
+            if (!roleConfigs || !Array.isArray(roleConfigs) || roleConfigs.length === 0) {
+                return interaction.editReply({ content: 'No roles are configured for the selection panel.' });
+            }
+
+            const embed = new EmbedBuilder()
+                .setColor(client.config?.embeds?.mainColor || '#2B2D31')
+                .setTitle('Role Selection')
+                .setDescription('Click the buttons below to get or remove roles!');
+
+            // Dynamically create embed fields from the config
+            roleConfigs.forEach(role => {
+                embed.addFields({
+                    name: `${role.emoji} ${role.label}`,
+                    value: role.description,
+                    inline: false
+                });
+            });
+
+            const buttons = new ActionRowBuilder();
+
+            // Dynamically create buttons from the config
+            roleConfigs.forEach(role => {
+                buttons.addComponents(
                     new ButtonBuilder()
-                        .setCustomId('role-announcements')
-                        .setLabel('Announcements')
-                        .setEmoji('✅')
-                        .setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder()
-                        .setCustomId('role-changelog')
-                        .setLabel('Changelog')
-                        .setEmoji('✏️')
-                        .setStyle(ButtonStyle.Secondary),
-                    new ButtonBuilder()
-                        .setCustomId('role-suggestions')
-                        .setLabel('Suggestions')
-                        .setEmoji('✨')
+                        .setCustomId(`role_${role.id}`) // e.g., role_announcements
+                        .setLabel(role.label)
+                        .setEmoji(role.emoji)
                         .setStyle(ButtonStyle.Secondary)
                 );
+            });
 
-            const message = await interaction.channel.send({
+            await interaction.channel.send({
                 embeds: [embed],
                 components: [buttons]
             });
-
-            if (!message) {
-                return await interaction.editReply({
-                    content: 'Failed to create the role selection panel.',
-                });
-            }
 
             await interaction.editReply({
                 content: 'Role selection panel has been created!'
@@ -75,20 +61,6 @@ module.exports = {
 
         } catch (error) {
             console.error('Error in roles command:', error);
-            try {
-                if (interaction.deferred) {
-                    await interaction.editReply({
-                        content: 'There was an error creating the role selection panel!'
-                    });
-                } else {
-                    await interaction.reply({
-                        content: 'There was an error creating the role selection panel!',
-                        ephemeral: true
-                    });
-                }
-            } catch (e) {
-                console.error('Error sending error message:', e);
-            }
         }
     },
-}; 
+};

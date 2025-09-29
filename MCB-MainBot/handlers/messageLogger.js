@@ -19,10 +19,10 @@ async function handleMessageDelete(message, client, config) {
     if (!message.guild || message.author?.bot) return;
 
     // Check if logging is enabled
-    if (!config.logging.messageDeleted) return;
+    if (!client.config.logging.messageDeleted) return;
 
     try {
-        const thread = await getLogThread(message.guild, config.logging.threads.deleted);
+        const thread = await getLogThread(message.guild, client.config.threads.deletedLogThreadId);
         if (!thread) return;
 
         // Try to get audit logs to find who deleted the message
@@ -41,7 +41,7 @@ async function handleMessageDelete(message, client, config) {
 
         const embed = new EmbedBuilder()
             .setTitle('Message Deleted')
-            .setColor(config.embeds.deniedEmbed)
+            .setColor(client.config.embeds.deniedEmbed)
             .addFields(
                 { 
                     name: 'Author', 
@@ -101,15 +101,15 @@ async function handleMessageEdit(oldMessage, newMessage, client, config) {
         oldMessage.content === newMessage.content) return;
 
     // Check if logging is enabled
-    if (!config.logging.messageEdited) return;
+    if (!client.config.logging.messageEdited) return;
 
     try {
-        const thread = await getLogThread(newMessage.guild, config.logging.threads.edited);
+        const thread = await getLogThread(newMessage.guild, client.config.threads.editedLogThreadId);
         if (!thread) return;
 
         const embed = new EmbedBuilder()
             .setTitle('Message Edited')
-            .setColor(config.embeds.mainColor)
+            .setColor(client.config.embeds.mainColor)
             .addFields(
                 { 
                     name: 'Author', 

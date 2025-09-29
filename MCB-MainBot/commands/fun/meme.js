@@ -38,9 +38,9 @@ module.exports = {
         .setName('meme')
         .setDescription('Get a random Minecraft meme'),
 
-    async execute(interaction, client, config) {
+    async execute(interaction, client) {
         // Check if command is used in the memes channel
-        if (interaction.channelId !== '1352308677163352094') {
+        if (interaction.channelId !== client.config.channels.memesChannel) {
             return interaction.reply({
                 content: 'This command can only be used in the memes channel!',
                 ephemeral: true
@@ -68,7 +68,7 @@ module.exports = {
 
             // Create embed
             const embed = new EmbedBuilder()
-                .setColor(config.embeds.acceptedEmbed)
+                .setColor(client.config.embeds.acceptedEmbed)
                 .setTitle(data.title.substring(0, 256)) // Discord has a 256 character limit for titles
                 .setURL(data.postLink)
                 .setImage(data.url)

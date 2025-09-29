@@ -3,42 +3,42 @@ const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
 const db = require('./Utils/database.js');
+const loadModels = require('./Utils/loadModels.js');
+const { merge } = require('lodash');
 
+console.log('----- Preparing startup.. -----');
 // Load central configuration
 let config = yaml.load(fs.readFileSync(path.join(__dirname, 'config.yml'), 'utf8'));
 console.log('Loaded central config.yml.');
-
-// 2. Iterate through bot directories to find and merge their specific configs
 if (config.bot && config.bot.botNames) {
     const botDirectories = config.bot.botNames;
 
     for (const botDir of botDirectories) {
-        const botConfigPath = path.join(__dirname, botDir, 'lang.yml');
+        const langFilePath = path.join(__dirname, botDir, 'lang.yml');
 
-        // Check if a lang.yml exists in the bot's folder
-        if (fs.existsSync(botConfigPath)) {
+        if (fs.existsSync(langFilePath)) {
             try {
-                const botSpecificConfig = yaml.load(fs.readFileSync(botConfigPath, 'utf8'));
+                const botLangConfig = yaml.load(fs.readFileSync(langFilePath, 'utf8'));
                 
-                // Merge the specific config into the main config object
-                // Properties in botSpecificConfig will overwrite properties in the main config
-                config = { ...config, ...botSpecificConfig };
+                // This will recursively merge nested objects and arrays.
+                merge(config, botLangConfig);
 
-                console.log(`✅ Merged clang from '${botDir}'.`);
+                console.log(`Merged lang from '${botDir}'.`);
             } catch (error) {
-                console.error(`❌ Error loading or merging lang from '${botDir}':`, error);
+                console.error(`Error loading or merging lang from '${botDir}':`, error);
             }
         }
     }
 }
-console.log('Configuration merging complete.');
-
 
 // Verify configuration
 if (!config.bot.token || !config.bot.clientId || !config.bot.guildId) {
     console.error('Missing bot configuration in config.yml');
     process.exit(1);
 }
+
+console.log('Configuration merging complete.');
+console.log('-------------------------------\n');
 
 // Create a single Discord client for all bots
 const client = new Client({
@@ -72,7 +72,6 @@ let allCommands = [];
 const loadedModules = [];
 let loadedCommandCount = 0;
 
-console.log('--- Loading Commands ---');
 
 
 function getCommandFiles(dir) {
@@ -98,6 +97,9 @@ async function startBot() {
     // Connect to the database ONCE
     await db.connect(config);
 
+    loadModels();
+    
+    console.log('------ Loading Commands -------');
     for (const botDir of botDirectories) {
         const commandsPath = path.join(__dirname, botDir, 'commands');
         if (!fs.existsSync(commandsPath)) {
@@ -141,13 +143,13 @@ async function startBot() {
     }
 
     console.log(`Total commands loaded: ${loadedCommandCount}`);
-    console.log('------------------------\n');
-
-    console.log('--- Loading Modules ---');
+    console.log('-------------------------------\n');
+    
+    console.log('------- Loading Modules -------');
     for (const botDir of config.bot.botNames) {
         const modulePath = path.join(__dirname, botDir, 'index.js');
         if (fs.existsSync(modulePath)) {
-            console.log(`Loading module: ${botDir}`);
+            console.log(`- Loading module: ${botDir}`);
             const module = require(modulePath);
             
             // Run the one-time setup for the module
@@ -158,7 +160,7 @@ async function startBot() {
             loadedModules.push(module);
         }
     }
-    console.log('-----------------------\n');
+    console.log('-------------------------------\n');
 
     client.login(config.bot.token);
 }
@@ -166,7 +168,8 @@ async function startBot() {
 client.once('clientReady', async () => {
     console.log(`\nLogged in as ${client.user.tag}!`);
 
-    // 1. First, register all application commands
+    console.log('----- Command Registration ----');
+    
     try {
         const rest = new REST({ version: '10' }).setToken(config.bot.token);
         console.log(`Started refreshing ${allCommands.length} application (/) commands.`);
@@ -181,17 +184,18 @@ client.once('clientReady', async () => {
         console.error('Error refreshing application commands:', error);
     }
 
-    // 2. NOW, dispatch the 'ready' event to all loaded modules
+    console.log('-------------------------------\n');
+
     console.log('Dispatching ready event to modules...');
     for (const module of loadedModules) {
         if (module.eventHandlers && module.eventHandlers.ready) {
-            // This calls the ready handler in each bot module that has one
+
             module.eventHandlers.ready(client, config);
         }
     }
 
     console.log("Finished loading modules and registering commands.")
-    console.log("--- BOT IS READY ---")
+    console.log("-------- BOT IS READY ---------")
 });
 
 client.on('interactionCreate', async interaction => {
@@ -221,7 +225,7 @@ client.on('interactionCreate', async interaction => {
 });
 
 // Generic event dispatcher for other events
-const eventsToDispatch = ['guildMemberAdd', 'guildMemberRemove', 'guildMemberUpdate', 'messageCreate'];
+const eventsToDispatch = ['guildMemberAdd', 'guildMemberRemove', 'guildMemberUpdate', 'messageCreate', 'messageDelete', 'messageUpdate'];
 
 for (const event of eventsToDispatch) {
     client.on(event, (...args) => {
@@ -236,7 +240,7 @@ for (const event of eventsToDispatch) {
 
 process.on('SIGINT', async () => {
     console.log('Shutting down...');
-    await db.close(); // Uses the new close function
+    await db.close();
     console.log('Database connection closed.');
     process.exit(0);
 });

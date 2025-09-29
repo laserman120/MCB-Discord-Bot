@@ -17,7 +17,7 @@ function initialize(client, config) {
         console.error('Unhandled promise rejection:', error);
     });
 
-    console.log('Main Module Initialized');
+    console.log('   - Main Module Initialized');
 }
 
 async function handleInteraction(interaction, client) {

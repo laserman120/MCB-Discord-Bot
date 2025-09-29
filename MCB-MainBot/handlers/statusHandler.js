@@ -8,7 +8,7 @@ function updateStatus(client, config) {
     }
 
     // Validate status text array exists and has content
-    if (!Array.isArray(config.botStatus.statusText) || config.botStatus.statusText.length === 0) {
+    if (!Array.isArray(client.config.botStatus.statusText) || client.config.botStatus.statusText.length === 0) {
         console.error('No status messages configured in botStatus.statusText');
         return;
     }
@@ -22,7 +22,7 @@ function updateStatus(client, config) {
         'STREAMING': ActivityType.Streaming
     };
 
-    let statusType = (config.botStatus.status || 'PLAYING').toUpperCase();
+    let statusType = (client.config.botStatus.status || 'PLAYING').toUpperCase();
 
     // Validate status type
     if (!statusMappings[statusType]) {
@@ -31,7 +31,7 @@ function updateStatus(client, config) {
     }
 
     // Get refresh time with default of 300 seconds (5 minutes)
-    const refreshTime = config.botStatus.refreshTime || 300;
+    const refreshTime = client.config.botStatus.refreshTime || 300;
 
     let statusIndex = 0;
     
@@ -44,8 +44,8 @@ function updateStatus(client, config) {
     // Function to update the bot's status
     function updateBotStatus() {
         try {
-            const guild = client.guilds.cache.get(config.bot.guildId);
-            let text = config.botStatus.statusText[statusIndex];
+            const guild = client.guilds.cache.get(client.config.bot.guildId);
+            let text = client.config.botStatus.statusText[statusIndex];
             
             // Replace {users} placeholder if it exists
             if (text.includes('{users}') && guild) {
@@ -57,7 +57,7 @@ function updateStatus(client, config) {
             });
 
             // Move to next status or loop back to beginning
-            statusIndex = (statusIndex + 1) % config.botStatus.statusText.length;
+            statusIndex = (statusIndex + 1) % client.config.botStatus.statusText.length;
 
         } catch (error) {
             console.error('Error updating bot status:', error);

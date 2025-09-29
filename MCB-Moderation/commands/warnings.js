@@ -86,7 +86,7 @@ async function execute(interaction, client) {
             .setCustomId('prev')
             .setLabel('Previous')
             .setStyle(ButtonStyle.Primary)
-            .setDisabled(warnings.length <= 1),
+            .setDisabled(true),
         new ButtonBuilder()
             .setCustomId('remove')
             .setLabel('Remove')
@@ -173,6 +173,8 @@ async function execute(interaction, client) {
                 const row = ActionRowBuilder.from(i.message.components[0]);
                 row.components[0].setDisabled(warnings.length <= 1);
                 row.components[2].setDisabled(warnings.length <= 1);
+                row.components[0].setDisabled(currentIndex === 0);
+                row.components[2].setDisabled(currentIndex === warnings.length - 1);
 
                 // Update embed
                 const newEmbed = createWarningEmbed(targetUser, warnings, currentIndex);

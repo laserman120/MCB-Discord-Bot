@@ -17,7 +17,7 @@ const contextMenu = new ContextMenuCommandBuilder()
     .setName('Unmute User')
     .setType(ApplicationCommandType.Message);
 
-async function execute(interaction) {
+async function execute(interaction, client) {
     // Check if user has staff role
     const member = interaction.member;
     if (!member.roles.cache.has(client.config.roles.staffRoleId)) {

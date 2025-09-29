@@ -5,7 +5,7 @@ const ticketHandler = require('./ticketHandler'); // Internal handler
 function initialize(client, config) {
     dns.setDefaultResultOrder('ipv4first');
     dns.setServers(['8.8.8.8', '1.1.1.1']);
-    console.log('Ticket-Bot module initialized.');
+    console.log('   - Ticket-Bot module initialized.');
 }
 
 async function handleInteraction(interaction, client) {

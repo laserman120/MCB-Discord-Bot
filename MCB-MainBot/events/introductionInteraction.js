@@ -8,14 +8,14 @@ module.exports = {
             // Handle introduction button
             if (interaction.isButton() && interaction.customId === 'create_intro') {
                 console.log('Introduction button clicked by:', interaction.user.tag);
-                await handleIntroButton(interaction, client, config);
+                await handleIntroButton(interaction, client, client.config);
                 return;
             }
 
             // Handle introduction modal submit
             if (interaction.isModalSubmit() && interaction.customId === 'intro_modal') {
                 console.log('Introduction modal submitted by:', interaction.user.tag);
-                await handleIntroSubmit(interaction, client, config);
+                await handleIntroSubmit(interaction, client, client.config);
                 return;
             }
 

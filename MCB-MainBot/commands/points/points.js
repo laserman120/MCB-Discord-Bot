@@ -7,7 +7,7 @@ module.exports = {
         .setName('points')
         .setDescription('View your current points'),
 
-    async execute(interaction, client, config) {
+    async execute(interaction, client) {
         try {
             const user = await User.findOne({ 
                 userId: interaction.user.id,
@@ -15,7 +15,7 @@ module.exports = {
             }) || { points: 0, dailyStreak: 0 };
 
             const embed = new EmbedBuilder()
-                .setColor(config.embeds.mainColor)
+                .setColor(client.config.embeds.mainColor)
                 .setAuthor({
                     name: interaction.user.tag,
                     iconURL: interaction.user.displayAvatarURL()

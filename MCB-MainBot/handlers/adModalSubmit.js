@@ -37,7 +37,7 @@ module.exports = {
                 if (timeSinceLastAd < (userCooldown * 1000)) {
                     const timeLeft = Math.ceil((userCooldown * 1000 - timeSinceLastAd) / 1000);
                     const embed = new EmbedBuilder()
-                        .setColor(config.embeds.deniedEmbed)
+                        .setColor(client.config.embeds.deniedEmbed)
                         .setDescription(`You can post another advertisement <t:${Math.floor(Date.now()/1000 + timeLeft)}:R>`)
                         .setFooter({ text: isBooster ? '✨ Server Boosters can post every 12 hours!' : '✨ Boost the server to post ads every 12 hours!' })
                         .setTimestamp();
@@ -52,10 +52,10 @@ module.exports = {
             // Check global cooldown again
             if (lastGlobalAd) {
                 const timeSinceLastGlobalAd = Date.now() - lastGlobalAd.timestamp.getTime();
-                if (timeSinceLastGlobalAd < (config.ads.globalCooldown * 1000)) {
-                    const timeLeft = Math.ceil((config.ads.globalCooldown * 1000 - timeSinceLastGlobalAd) / 1000);
+                if (timeSinceLastGlobalAd < (client.config.ads.globalCooldown * 1000)) {
+                    const timeLeft = Math.ceil((client.config.ads.globalCooldown * 1000 - timeSinceLastGlobalAd) / 1000);
                     const embed = new EmbedBuilder()
-                        .setColor(config.embeds.deniedEmbed)
+                        .setColor(client.config.embeds.deniedEmbed)
                         .setDescription(`Someone recently posted an ad. You can post <t:${Math.floor(Date.now()/1000 + timeLeft)}:R>`)
                         .setTimestamp();
                     
@@ -73,10 +73,10 @@ module.exports = {
             });
 
             // Double check points
-            if (!user || user.points < config.ads.cost) {
+            if (!user || user.points < client.config.ads.cost) {
                 const embed = new EmbedBuilder()
-                    .setColor(config.embeds.deniedEmbed)
-                    .setDescription(`You need ${config.ads.cost} points to post an advertisement.\nCurrent balance: ${user?.points || 0}`)
+                    .setColor(client.config.embeds.deniedEmbed)
+                    .setDescription(`You need ${client.config.ads.cost} points to post an advertisement.\nCurrent balance: ${user?.points || 0}`)
                     .setTimestamp();
                 
                 return interaction.reply({
@@ -97,7 +97,7 @@ module.exports = {
 
             // Create the ad embed
             const adEmbed = new EmbedBuilder()
-                .setColor(config.embeds.mainColor)
+                .setColor(client.config.embeds.mainColor)
                 .setAuthor({ 
                     name: interaction.user.tag, 
                     iconURL: interaction.user.displayAvatarURL() 
@@ -126,7 +126,7 @@ module.exports = {
             let channelsPostedIn = [];
 
             // Post to all configured channels
-            for (const channelId of config.ads.adChannels) {
+            for (const channelId of client.config.ads.adChannels) {
                 try {
                     const channel = await client.channels.fetch(channelId);
                     if (channel) {
@@ -149,7 +149,7 @@ module.exports = {
                 content: adContent,
                 messageIds: messageIds,
                 channelsPostedIn: channelsPostedIn,
-                cost: config.ads.cost,
+                cost: client.config.ads.cost,
                 status: 'active',
                 title: communityName,
                 wasBooster: isBooster
@@ -157,18 +157,18 @@ module.exports = {
             await newAd.save();
 
             // Deduct points
-            user.points -= config.ads.cost;
+            user.points -= client.config.ads.cost;
             await user.save();
 
             // Create confirmation embed
             const confirmationEmbed = new EmbedBuilder()
-                .setColor(config.embeds.acceptedEmbed)
+                .setColor(client.config.embeds.acceptedEmbed)
                 .setTitle('Advertisement Posted!')
                 .setDescription(`Your advertisement for "${communityName}" has been posted successfully!`)
                 .addFields(
                     { 
                         name: 'Cost', 
-                        value: `${config.ads.cost} points`, 
+                        value: `${client.config.ads.cost} points`, 
                         inline: true 
                     },
                     { 
@@ -198,7 +198,7 @@ module.exports = {
         } catch (error) {
             console.error('Error processing ad:', error);
             const embed = new EmbedBuilder()
-                .setColor(config.embeds.deniedEmbed)
+                .setColor(client.config.embeds.deniedEmbed)
                 .setDescription('There was an error processing your advertisement.')
                 .setTimestamp();
             

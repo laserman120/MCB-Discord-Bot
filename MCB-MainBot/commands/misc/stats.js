@@ -5,7 +5,7 @@ module.exports = {
         .setName('stats')
         .setDescription('View server statistics'),
 
-    async execute(interaction, client, config) {
+    async execute(interaction, client) {
         try {
             const guild = interaction.guild;
 
@@ -24,7 +24,7 @@ module.exports = {
 
             // Create the stats embed
             const statsEmbed = new EmbedBuilder()
-                .setColor(config.embeds.mainColor)
+                .setColor(client.config.embeds.mainColor)
                 .setTitle(`${guild.name} Statistics`)
                 .setThumbnail(guild.iconURL({ dynamic: true }))
                 .addFields(
@@ -64,11 +64,11 @@ module.exports = {
             });
 
             // Create and send log embed
-            if (config.logging.channel_id) {
-                const logChannel = await guild.channels.fetch(config.logging.channel_id);
+            if (client.config.channels.loggingChannel) {
+                const logChannel = await guild.channels.fetch(client.config.channels.loggingChannel);
                 if (logChannel) {
                     const logEmbed = new EmbedBuilder()
-                        .setColor(config.embeds.mainColor)
+                        .setColor(client.config.embeds.mainColor)
                         .setTitle('Command Used: /stats')
                         .addFields(
                             { 

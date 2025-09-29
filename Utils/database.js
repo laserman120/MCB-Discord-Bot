@@ -1,45 +1,49 @@
-const { MongoClient } = require('mongodb');
+const mongoose = require('mongoose');
 
-let client;
-let db;
+// This will give us real-time feedback on the connection status
+const dbConnection = mongoose.connection;
 
-/**
- * Connects to the MongoDB database once.
- * This should be called from your main index.js at startup.
- */
+dbConnection.on('connecting', () => {
+    console.log(' Mongoose: Connecting to MongoDB...');
+});
+
+dbConnection.on('connected', () => {
+    console.log(' Mongoose: Successfully connected to MongoDB.');
+});
+
+dbConnection.on('error', (err) => {
+    console.error(' Mongoose: Connection error:', err);
+});
+
+dbConnection.on('disconnected', () => {
+    console.warn(' Mongoose: Disconnected from MongoDB.');
+});
+
 async function connect(config) {
     if (!config.database.uri) {
         throw new Error('Database URI is missing from config.yml');
     }
     try {
-        client = new MongoClient(config.database.uri);
-        await client.connect();
-        db = client.db('mcb_moderation'); // Or your main DB name
-        console.log('📊 Successfully connected to MongoDB.');
+        // This will now trigger the event listeners above
+        await mongoose.connect(config.database.uri, {
+            dbName: 'MinecraftBuddies',
+        });
     } catch (error) {
-        console.error('❌ MongoDB connection error:', error);
+        // The 'error' event listener will also catch this
+        console.error(' Mongoose: Initial connection failed:', error);
         process.exit(1);
     }
 }
 
-/**
- * Gracefully closes the database connection.
- */
-async function close() {
-    if (client) {
-        await client.close();
-    }
+function close() {
+    return mongoose.disconnect();
 }
 
-/**
- * Returns the connected database instance.
- * All modules will call this function to get access to the DB.
- */
 function getDb() {
-    if (!db) {
+    if (mongoose.connection.readyState !== 1) { // 1 = connected
         throw new Error('Database not initialized. Ensure connect() is called first.');
     }
-    return db;
+    return mongoose.connection.db;
 }
 
 module.exports = { connect, close, getDb };

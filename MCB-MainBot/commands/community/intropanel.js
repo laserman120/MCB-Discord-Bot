@@ -14,9 +14,9 @@ module.exports = {
         .setDescription('Create the introduction panel')
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
 
-    async execute(interaction, client, config) {
+    async execute(interaction, client) {
         const embed = new EmbedBuilder()
-            .setColor(config.embeds?.mainColor ?? '#5865F2')
+            .setColor(client.config.embeds?.mainColor ?? '#5865F2')
             .setTitle('👋 Welcome to Our Community!')
             .setDescription('Click the button below to introduce yourself to everyone!')
             .addFields({

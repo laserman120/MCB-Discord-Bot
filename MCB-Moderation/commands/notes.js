@@ -96,7 +96,7 @@ module.exports = {
                     .setTimestamp();
 
                 // Send log to misc thread
-                const logThread = await interaction.guild.channels.fetch('1360784310268989531');
+                const logThread = await interaction.guild.channels.fetch(client.config.threads.noteLogThreadId);
                 if (logThread) {
                     await logThread.send({ embeds: [logEmbed] });
                 }

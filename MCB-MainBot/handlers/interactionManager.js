@@ -17,15 +17,13 @@ class InteractionManager {
         this.config = config;
     }
 
-    // CHANGED: This is now the core router for components ONLY
+    // This is now the core router for components ONLY
     async handleInteraction(interaction, client) {
         try {
             if (interaction.isButton()) {
                 return await this.handleButtonInteraction(interaction);
             } else if (interaction.isModalSubmit()) {
                 return await this.handleModalSubmit(interaction);
-            } else if (interaction.isStringSelectMenu()) {
-                return await this.handleSelectMenu(interaction);
             }
         } catch (error) {
             console.error('Error handling component interaction:', error);
@@ -88,16 +86,6 @@ class InteractionManager {
         return false; // This modal isn't for us
     }
 
-    async handleSelectMenu(interaction) {
-        if (interaction.customId.startsWith('warn_reason_')) {
-            const warningInteraction = require('../events/warningInteraction');
-            await warningInteraction.execute(interaction, this.client, this.config);
-            return true;
-        }
-
-        return false; // This select menu isn't for us
-    }
-
     // Helper methods for specific interactions
     async handleDMUserButton(interaction) {
         const targetUserId = interaction.customId.split('_')[2];
@@ -140,7 +128,7 @@ class InteractionManager {
         const reason = interaction.fields.getTextInputValue('report-reason');
 
         try {
-            const modChannel = await interaction.guild.channels.fetch(this.config.logging.channel_id);
+            const modChannel = await interaction.guild.channels.fetch(this.config.channels.loggingChannel);
             if (modChannel) {
                 await modChannel.send({
                     embeds: [{
@@ -206,8 +194,8 @@ class InteractionManager {
             });
 
             // Create log embed
-            if (this.config.logging.channel_id) {
-                const logChannel = await interaction.guild.channels.fetch(this.config.logging.channel_id);
+            if (this.config.channels.loggingChannel) {
+                const logChannel = await interaction.guild.channels.fetch(this.config.channels.loggingChannel);
                 if (logChannel) {
                     const logEmbed = new EmbedBuilder()
                         .setColor(this.config.embeds.mainColor)

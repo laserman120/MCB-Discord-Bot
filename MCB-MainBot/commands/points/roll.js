@@ -6,7 +6,7 @@ module.exports = {
         .setName('roll')
         .setDescription('Roll for a chance to win points (40% chance to win 1-5 points)'),
 
-    async execute(interaction, client, config) {
+    async execute(interaction, client) {
         try {
             // Get or create user
             let user = await User.findOne({ 
@@ -57,7 +57,7 @@ module.exports = {
 
             // Create embed
             const embed = new EmbedBuilder()
-                .setColor(won ? config.embeds.acceptedEmbed : config.embeds.deniedEmbed)
+                .setColor(won ? client.config.embeds.acceptedEmbed : client.config.embeds.deniedEmbed)
                 .setTitle('🎲 Roll Results')
                 .setDescription(won ? 
                     `Congratulations! You won ${pointsWon} points!` : 

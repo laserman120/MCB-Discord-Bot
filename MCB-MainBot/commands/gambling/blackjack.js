@@ -103,7 +103,7 @@ module.exports = {
                 .setRequired(true)
                 .setMinValue(1)),
 
-    async execute(interaction, client, config) {
+    async execute(interaction, client) {
         try {
             // Create a new interaction handler for the game
             const handleInteraction = async (i) => {
@@ -111,7 +111,7 @@ module.exports = {
                     // Start a new game with the same bet
                     await i.deferUpdate();
                     const bet = interaction.options.getInteger('bet');
-                    await handleGame(i, client, config, bet);
+                    await handleGame(i, client, client.config, bet);
                 }
             };
 
@@ -125,7 +125,7 @@ module.exports = {
             collector.on('collect', handleInteraction);
 
             // Start the initial game
-            await handleGame(interaction, client, config);
+            await handleGame(interaction, client, client.config);
 
         } catch (error) {
             console.error('Error in blackjack command:', error);
@@ -187,7 +187,7 @@ async function handleGame(interaction, client, config, previousBet = null) {
         );
 
     // Create initial embed
-    const embed = createGameEmbed(playerHand, dealerHand, bet, user.points, config, true);
+    const embed = createGameEmbed(playerHand, dealerHand, bet, user.points, client.config, true);
 
     // Check for natural blackjack
     if (getHandValue(playerHand) === 21) {
@@ -199,12 +199,12 @@ async function handleGame(interaction, client, config, previousBet = null) {
             const multiplier = isBooster ? 3 : 2.5;
             const winnings = Math.floor(bet * multiplier);
             user.points += winnings;
-            embed.setColor(config.embeds.acceptedEmbed)
+            embed.setColor(client.config.embeds.acceptedEmbed)
                  .setDescription(`**🎉 BLACKJACK! You win ${multiplier}x your bet!**\n${isBooster ? 
                      '*(Booster bonus applied!)*' : 
                      '*💎 Boost the server to get 3x on blackjack wins!*'}`);
         } else if (isPlayerBlackjack && isDealerBlackjack) {
-            embed.setColor(config.embeds.mainColor)
+            embed.setColor(client.config.embeds.mainColor)
                  .setDescription('**Push! Both had Blackjack. Bet returned.**\n' +
                      (!isBooster ? '*💎 Boost the server to get 2x on blackjack wins!*' : ''));
         }
@@ -255,7 +255,7 @@ async function handleGame(interaction, client, config, previousBet = null) {
 
             if (i.customId === 'info') {
                 const infoEmbed = new EmbedBuilder()
-                    .setColor(config.embeds.mainColor)
+                    .setColor(client.config.embeds.mainColor)
                     .setTitle('🎰 Blackjack Rules & Payouts')
                     .setDescription('Try to beat the dealer by getting closer to 21 without going over!')
                     .addFields(
@@ -338,7 +338,7 @@ async function handleGame(interaction, client, config, previousBet = null) {
                     user.points -= bet;
                     await user.save();
                     
-                    currentEmbed.setColor(config.embeds.deniedEmbed)
+                    currentEmbed.setColor(client.config.embeds.deniedEmbed)
                          .setDescription('**💥 BUST! You lose! 💥**\n' +
                              (!isBooster ? '*💎 Boost the server to get 2.5x on wins!*' : ''));
                     
@@ -373,12 +373,12 @@ async function handleGame(interaction, client, config, previousBet = null) {
                         '*(Booster bonus applied!)*' : 
                         '*💎 Boost the server to get 2.5x on wins!*'}`;
                     user.points += winnings + bet;
-                    color = config.embeds.acceptedEmbed;
+                    color = client.config.embeds.acceptedEmbed;
                 } else if (dealerValue > playerValue) {
                     result = '**❌ Dealer wins! ❌**\n' + 
                         (!isBooster ? '*💎 Boost the server to get 2.5x on wins!*' : '');
                     user.points -= bet;
-                    color = config.embeds.deniedEmbed;
+                    color = client.config.embeds.deniedEmbed;
                 } else if (dealerValue < playerValue) {
                     const multiplier = isBooster ? 2.5 : 2;
                     winnings = Math.floor(bet * (multiplier - 1));
@@ -386,11 +386,11 @@ async function handleGame(interaction, client, config, previousBet = null) {
                         '*(Booster bonus applied!)*' : 
                         '*💎 Boost the server to get 2.5x on wins!*'}`;
                     user.points += winnings + bet;
-                    color = config.embeds.acceptedEmbed;
+                    color = client.config.embeds.acceptedEmbed;
                 } else {
                     result = '**🤝 Push! Bet returned. 🤝**\n' +
                         (!isBooster ? '*💎 Boost the server to get 2.5x on wins!*' : '');
-                    color = config.embeds.mainColor;
+                    color = client.config.embeds.mainColor;
                 }
 
                 currentEmbed.spliceFields(0, currentEmbed.data.fields.length);
@@ -429,7 +429,7 @@ function createGameEmbed(playerHand, dealerHand, bet, points, config, hideDealer
     const dealerValue = hideDealer ? getHandValue([dealerHand[0]]) : getHandValue(dealerHand);
     
     const embed = new EmbedBuilder()
-        .setColor(config.embeds.mainColor)
+        .setColor(client.config.embeds.mainColor)
         .setTitle('🎰 Blackjack Game')
         .setDescription('Game in progress...')
         .addFields(

@@ -33,7 +33,7 @@ module.exports = {
                         .setRequired(true)
                         .setMinValue(1))),
 
-    async execute(interaction, client, config) {
+    async execute(interaction, client) {
         const subcommand = interaction.options.getSubcommand();
         const target = interaction.options.getUser('user');
         const amount = interaction.options.getInteger('amount');
@@ -55,7 +55,7 @@ module.exports = {
 
             // Create base embed for logging
             const logEmbed = new EmbedBuilder()
-                .setColor(subcommand === 'give' ? config.embeds.acceptedEmbed : config.embeds.deniedEmbed)
+                .setColor(subcommand === 'give' ? client.config.embeds.acceptedEmbed : client.config.embeds.deniedEmbed)
                 .setTitle(`Points ${subcommand === 'give' ? 'Given' : 'Removed'}`)
                 .addFields(
                     { name: 'Staff Member', value: interaction.user.toString() },
@@ -66,7 +66,7 @@ module.exports = {
 
             // Create response embed
             const responseEmbed = new EmbedBuilder()
-                .setColor(subcommand === 'give' ? config.embeds.acceptedEmbed : config.embeds.deniedEmbed)
+                .setColor(subcommand === 'give' ? client.config.embeds.acceptedEmbed : client.config.embeds.deniedEmbed)
                 .setTitle(`Points ${subcommand === 'give' ? 'Given' : 'Removed'}`);
 
             if (subcommand === 'give') {
@@ -78,7 +78,7 @@ module.exports = {
                 if (userDoc.points < amount) {
                     return interaction.reply({
                         embeds: [new EmbedBuilder()
-                            .setColor(config.embeds.deniedEmbed)
+                            .setColor(client.config.embeds.deniedEmbed)
                             .setDescription(`${target} only has ${userDoc.points} points. Cannot remove ${amount} points.`)],
                         ephemeral: true
                     });
@@ -92,7 +92,7 @@ module.exports = {
             await userDoc.save();
 
             // Log the action
-            const logChannel = await interaction.guild.channels.fetch(config.logging.channel_id);
+            const logChannel = await interaction.guild.channels.fetch(client.config.channels.loggingChannel);
             if (logChannel) {
                 await logChannel.send({ embeds: [logEmbed] });
             }
@@ -106,7 +106,7 @@ module.exports = {
             // Try to DM the target user
             try {
                 const dmEmbed = new EmbedBuilder()
-                    .setColor(subcommand === 'give' ? config.embeds.acceptedEmbed : config.embeds.deniedEmbed)
+                    .setColor(subcommand === 'give' ? client.config.embeds.acceptedEmbed : client.config.embeds.deniedEmbed)
                     .setTitle(`Points ${subcommand === 'give' ? 'Received' : 'Removed'}`)
                     .setDescription(`${amount} points have been ${subcommand === 'give' ? 'added to' : 'removed from'} your account`)
                     .addFields({ name: 'New Balance', value: userDoc.points.toString() })

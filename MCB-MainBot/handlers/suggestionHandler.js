@@ -7,7 +7,7 @@ async function handleSuggestionSubmit(interaction, client, config) {
         const content = interaction.fields.getTextInputValue('suggestion-content');
 
         // Get the suggestions channel
-        const channel = await interaction.guild.channels.fetch(config.suggestion.suggestionID);
+        const channel = await interaction.guild.channels.fetch(client.config.channels.suggestionChannel);
         if (!channel) {
             return await interaction.reply({
                 content: 'Suggestion channel not found!',
@@ -29,7 +29,7 @@ async function handleSuggestionSubmit(interaction, client, config) {
 
         // Send the embed with role ping and create a thread
         const suggestionMsg = await channel.send({ 
-            content: `<@&${config.suggestion.suggestionRole}>`,
+            content: `<@&${client.config.roles.suggestionRoleId}>`,
             embeds: [suggestionEmbed] 
         });
         
@@ -40,8 +40,8 @@ async function handleSuggestionSubmit(interaction, client, config) {
         });
 
         // Add reactions from config
-        await suggestionMsg.react(config.suggestion.upvoteEmoji);
-        await suggestionMsg.react(config.suggestion.downvoteEmoji);
+        await suggestionMsg.react(client.config.suggestion.upvoteEmoji);
+        await suggestionMsg.react(client.config.suggestion.downvoteEmoji);
 
         // Save to database
         const suggestion = new Suggestion({

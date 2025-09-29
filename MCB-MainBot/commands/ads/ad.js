@@ -1,14 +1,14 @@
 const { SlashCommandBuilder, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
-const User = require('../../models/User');
-const ServerSettings = require('../../models/ServerSettings');
-const Ad = require('../../models/Ad');
+const mongoose = require('mongoose');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('ad')
         .setDescription('Create and post an advertisement'),
 
-    async execute(interaction, client, config) {
+    async execute(interaction, client) {
+        const User = mongoose.model('User');
+        const Ad = mongoose.model('Ad');
         try {
             // Check user points
             const user = await User.findOne({ 
@@ -16,10 +16,10 @@ module.exports = {
                 guildId: interaction.guild.id 
             });
 
-            if (!user || user.points < config.ads.cost) {
+            if (!user || user.points < client.config.ads.cost) {
                 const embed = new EmbedBuilder()
-                    .setColor(config.embeds.deniedEmbed)
-                    .setDescription(`You need ${config.ads.cost} points to post an advertisement.\nCurrent balance: ${user?.points || 0}`)
+                    .setColor(client.config.embeds.deniedEmbed)
+                    .setDescription(`You need ${client.config.ads.cost} points to post an advertisement.\nCurrent balance: ${user?.points || 0}`)
                     .setTimestamp();
                 
                 return interaction.reply({
@@ -43,7 +43,7 @@ module.exports = {
                 if (timeSinceLastAd < (userCooldown * 1000)) {
                     const timeLeft = Math.ceil((userCooldown * 1000 - timeSinceLastAd) / 1000);
                     const embed = new EmbedBuilder()
-                        .setColor(config.embeds.deniedEmbed)
+                        .setColor(client.config.embeds.deniedEmbed)
                         .setDescription(`You can post another advertisement <t:${Math.floor(Date.now()/1000 + timeLeft)}:R>`)
                         .setFooter({ text: isBooster ? '✨ Server Boosters can post every 12 hours!' : '✨ Boost the server to post ads every 12 hours!' })
                         .setTimestamp();
@@ -62,10 +62,10 @@ module.exports = {
 
             if (lastGlobalAd) {
                 const timeSinceLastGlobalAd = Date.now() - lastGlobalAd.timestamp.getTime();
-                if (timeSinceLastGlobalAd < (config.ads.globalCooldown * 1000)) {
-                    const timeLeft = Math.ceil((config.ads.globalCooldown * 1000 - timeSinceLastGlobalAd) / 1000);
+                if (timeSinceLastGlobalAd < (client.config.ads.globalCooldown * 1000)) {
+                    const timeLeft = Math.ceil((client.config.ads.globalCooldown * 1000 - timeSinceLastGlobalAd) / 1000);
                     const embed = new EmbedBuilder()
-                        .setColor(config.embeds.deniedEmbed)
+                        .setColor(client.config.embeds.deniedEmbed)
                         .setDescription(`Someone recently posted an ad. You can post <t:${Math.floor(Date.now()/1000 + timeLeft)}:R>`)
                         .setTimestamp();
                     
@@ -97,7 +97,7 @@ module.exports = {
                 .setLabel('Description')
                 .setStyle(TextInputStyle.Paragraph)
                 .setMinLength(10)
-                .setMaxLength(config.ads.max_length)
+                .setMaxLength(client.config.ads.max_length)
                 .setPlaceholder('Describe your community (No IPs or Discord links - read rules if unsure)')
                 .setRequired(true);
 
@@ -124,7 +124,7 @@ module.exports = {
         } catch (error) {
             console.error('Error in ad command:', error);
             const embed = new EmbedBuilder()
-                .setColor(config.embeds.deniedEmbed)
+                .setColor(client.config.embeds.deniedEmbed)
                 .setDescription('There was an error processing your advertisement request.')
                 .setTimestamp();
             
