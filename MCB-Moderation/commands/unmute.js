@@ -2,6 +2,7 @@ const { SlashCommandBuilder, ContextMenuCommandBuilder, ApplicationCommandType, 
 const fs = require('fs');
 const yaml = require('js-yaml');
 const path = require('path');
+const { removeMute } = require('../utils/database'); 
 
 // Create the slash command
 const data = new SlashCommandBuilder()
@@ -18,6 +19,9 @@ const contextMenu = new ContextMenuCommandBuilder()
     .setType(ApplicationCommandType.Message);
 
 async function execute(interaction, client) {
+
+    await interaction.deferReply({ ephemeral: true });
+
     // Check if user has staff role
     const member = interaction.member;
     if (!member.roles.cache.has(client.config.roles.staffRoleId)) {
@@ -38,65 +42,63 @@ async function execute(interaction, client) {
         const targetMember = await interaction.guild.members.fetch(targetUser.id);
         const muteRole = interaction.guild.roles.cache.get(client.config.roles.muteRoleId);
 
-        if (!muteRole) {
-            return interaction.reply({
-                content: 'Mute role not found. Please check your configuration.',
-                ephemeral: true
-            });
+        if (!targetMember.isCommunicationDisabled() && !targetMember.roles.cache.has(muteRole.id)) {
+            return interaction.editReply({ content: `${targetUser.tag} is not currently muted or timed out.` });
         }
 
-        // Check if user is actually muted
-        if (!targetMember.roles.cache.has(muteRole.id)) {
-            return interaction.reply({
-                content: `${targetUser.tag} is not muted.`,
-                ephemeral: true
-            });
-        }
+        await Promise.all([
+            targetMember.timeout(null, `Manually unmuted by ${interaction.user.tag}`),
+            (muteRole && targetMember.roles.cache.has(muteRole.id))
+                ? targetMember.roles.remove(muteRole, `Manually unmuted by ${interaction.user.tag}`)
+                : Promise.resolve() // Do nothing if role is missing or user doesn't have it
+        ]);
 
-        // Remove mute role
-        await targetMember.roles.remove(muteRole);
+        // Remove the mute entry from the database
+        await removeMute(targetUser.id);
 
         // Create unmute log embed
         const logEmbed = new EmbedBuilder()
             .setColor('#00FF00')
-            .setTitle('User Unmuted')
-            .setDescription(`User ${targetUser.tag} (${targetUser.id}) has been unmuted`)
+            .setTitle('User Unmuted (Manual)')
+            .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
+            .setDescription(`<@${targetUser.id}> has been manually unmuted.`)
             .addFields(
-                { name: 'Unmuted by', value: interaction.user.tag },
-                { name: 'Timestamp', value: new Date().toISOString() }
+                { name: 'Unmuted by', value: interaction.user.toString() },
+                { name: 'Timestamp', value: `<t:${Math.floor(Date.now() / 1000)}:F>` }
             );
 
         // Send to log thread
-        const logThread = await interaction.guild.channels.fetch(client.config.threads.muteLogThreadId);
-        await logThread.send({ embeds: [logEmbed] });
+        try {
+            const logThread = await interaction.guild.channels.fetch(client.config.threads.muteLogThreadId);
+            await logThread.send({ embeds: [logEmbed] });
+        } catch (logError) {
+            console.error('Could not send unmute log to thread:', logError);
+        }
 
         // Send DM to unmuted user
         try {
             const dmEmbed = new EmbedBuilder()
                 .setColor('#00FF00')
                 .setTitle('You have been unmuted')
-                .setDescription(`You have been unmuted in ${interaction.guild.name}`)
-                .addFields(
-                    { name: 'Unmuted by', value: interaction.user.tag }
-                );
-
+                .setDescription(`You have been manually unmuted in ${interaction.guild.name} by a staff member.`);
             await targetUser.send({ embeds: [dmEmbed] });
         } catch (dmError) {
-            console.error('Could not send DM to unmuted user:', dmError);
+            console.error('Could not send DM to unmuted user...');
         }
 
         // Reply to command
-        await interaction.reply({
-            content: `Successfully unmuted ${targetUser.tag}`,
-            ephemeral: true
+        await interaction.editReply({
+            content: `Successfully unmuted ${targetUser.tag}`
         });
 
     } catch (error) {
-        console.error('Error unmuting user:', error);
-        await interaction.reply({
-            content: 'There was an error unmuting the user. Please try again.',
-            ephemeral: true
-        });
+        console.error('Error in /unmute command:', error);
+        // Handle cases where the user may have left the server
+        if (error.code === 10007) { // Unknown Member
+            await removeMute(targetUser.id); // Clean up DB if user is gone
+            return interaction.editReply({ content: 'That user could not be found in this server. Their mute has been cleared from the database.' });
+        }
+        await interaction.editReply({ content: 'There was an error unmuting the user. Please try again.' });
     }
 }
 

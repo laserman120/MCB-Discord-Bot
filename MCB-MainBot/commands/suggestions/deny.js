@@ -38,8 +38,7 @@ module.exports = {
             const reason = interaction.options.getString('reason') || 'No reason provided';
 
             // Get the original message and update its embed
-            const suggestionChannel = await client.channels.fetch(client.config.channels.suggestionChannel);
-            const originalMessage = await suggestionChannel.messages.fetch(suggestion.messageId);
+            const originalMessage = await interaction.channel.fetchStarterMessage();
             const originalEmbed = originalMessage.embeds[0];
 
             const updatedEmbed = EmbedBuilder.from(originalEmbed)
@@ -73,6 +72,11 @@ module.exports = {
                 content: 'Suggestion denied successfully!',
                 ephemeral: true
             });
+
+            const deniedTagId = client.config.suggestionSystem.tagIds.suggestionDeniedId;
+            if (deniedTagId && interaction.channel.parent.availableTags.some(t => t.id === deniedTagId)) {
+                await interaction.channel.setAppliedTags([deniedTagId]);
+            }
 
             // Lock and archive the thread last
             if (!interaction.channel.archived) {

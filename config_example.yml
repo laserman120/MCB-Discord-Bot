@@ -1,0 +1,155 @@
+# Main Config for all bots managed by the Manager.
+# This data will be loaded into all 3 bots.
+
+# Basic Bot Data
+bot:
+  token: BOT_TOKEN_HERE  # Replace with your bot token from Discord Developer Portal
+  clientId: "1419584057519640649"  # Replace with your bot's client ID
+  guildId: "1418252722632921170"  # Replace with your Discord server's guild ID
+  botNames: ["MCB-Moderation", "MCB-Tickets", "MCB-MainBot"] # The directory names of the bots that should be started up.
+
+# Database Settings
+database:
+  uri: ATLAS_URI_HERE  # Replace with your MongoDB Atlas URI
+
+# Basic Role data
+roles:
+  staffRoleId: "1418252723039502489"  # Staff role ID
+  supportRole: '1418252723039502489'  # The role that can see and manage tickets
+  whitelistRole: '1418252722632921171' # The role used to enable access to the minecraft server channels.
+  muteRoleId: "1418252723039502487" # The role to use when a user is muted
+  suggestionRoleId: "1418252722632921174"
+  rolesSelector: # This defines the roles for the /roles command.
+    - id: 'announcements'
+      label: 'Announcements'
+      emoji: '✅'
+      description: 'Get pinged for new announcements'
+      roleId: '1418252722632921176' # Replace with your actual Role ID
+
+    - id: 'changelog'
+      label: 'Changelog'
+      emoji: '✏️'
+      description: 'Get notified about changelogs'
+      roleId: '1418252722632921175' # Replace with your actual Role ID
+
+    - id: 'suggestions'
+      label: 'Suggestions'
+      emoji: '✨'
+      description: 'Get pinged for new suggestions'
+      roleId: '1418252722632921174' # Replace with your actual Role ID
+
+# Category Ids
+categories:
+  ticketCategory: '1418252723773505671'
+  
+# Channel Ids
+channels:
+  transcriptChannel: '1418252724088209500'
+  serverConsoleChannel: '1418252724247461915'
+  howToJoin: '1418252724088209501'
+  resources: '1418252724088209501'
+  introductionChannel: "1418252724088209504"
+  suggestionChannel: "1418252724247461912"
+  loggingChannel: "1418252723626836029"
+  memesChannel: "1418252724088209506"
+  botCommandChannel: "1418252724088209508" # To prevent bot spam for commands likey /daily only this channel is whitelisted.
+  
+# Thread Ids
+threads:
+  editedLogThreadId: "1421536413031333980"
+  warningsLogThreadId: "1420288195236597872"
+  banLogThreadId: "1420288229923487807"
+  muteLogThreadId: "1420288274420727828"
+  noteLogThreadId: "1420288195236597872"
+  deletedLogThreadId: "1421536459588108492"
+  antiHoistLogThreadId: "YOUR_ANTI_HOIST_LOG_THREAD_ID"
+  antiLinkLogThreadId: "YOUR_ANTI_LINK_LOG_THREAD_ID"
+
+# Logging
+logging:
+ messageEdited: true
+ messageDeleted: true
+
+forums:
+  suggestionForumId: ""
+
+# Ticket System Settings
+ticketSystem:
+  inactivityTimeout: 2880 # Time in minutes
+  maxTicketsPerUser: 1 # How many tickets a user can have open at once
+
+# Moderation System Settings
+moderationSystem:
+  muteSettings:
+    defaultDuration: 24 # The DEFAULT time for a mute in hours
+  warningSettings:
+    maxWarnings: 3 # How many warnings to recieve before a mute is applied
+    warningExpirationDays: 7 # How long until a warning expires
+    autoMuteDurationHours: 24 # The DEFAULT time the automatic mute in hours
+
+# Anti-Hoist Settings
+antiHoist:
+  enabled: false  # Enable or disable anti-hoist feature
+  prefix: "!"  # Character to add before hoisted names
+  exemptRoles:  # Roles that are exempt from anti-hoist
+    - "1418252723039502489"  # Staff role ID
+  action: "warn"  # Action to take when hoisting is detected (warn, mute, or none)
+  warningReason: "Name Hoisting"  # Reason for warning if action is set to warn
+
+# Anti-Link Settings
+antiLink:
+  enabled: false  # Enable or disable anti-link feature
+  exemptRoles:  # Roles that are exempt from anti-link
+    - "1418252723039502489"  # Staff role ID
+  exemptChannels:  # Channels where links are allowed
+    - "YOUR_CHANNEL_ID_HERE"  # Channel ID where links are allowed
+  action: "warn"  # Action to take when links are detected (warn, mute, or none)
+  warningReason: "Unauthorized Link"  # Reason for warning if action is set to warn
+  blockedDomains:  # List of blocked domains
+    - "discord.gg"
+    - "discord.com/invite"
+    - "discordapp.com/invite"
+
+# Advertisement System
+ads:
+  cost: 2  # Points required to post an ad
+  userCooldown: 3600  # Individual user cooldown in seconds (1 hour)
+  globalCooldown: 300 # Global cooldown in seconds (5 minutes)
+  max_length: 500  # Maximum character length for ads
+  rules: |
+    1. No inappropriate content
+    2. No spamming
+    3. Relate to Minecraft only
+    4. No external links
+    5. No named servers
+    6. No links to other discord servers
+  adChannels: # Ad channels is a list, so you can have several whitelisted
+  - "1418252724088209506"
+
+# Point System
+points:
+ message_chance: 0.05  # 5% chance to earn a point per message
+ message_cooldown: 60  # Cooldown in seconds between point earnings (1 minute)
+ daily_amount: 2  # Points earned from daily command
+ streak_bonusMin: 1 # The min points they get from a streak
+ streak_bonusMax: 5  # Additional points earned per day of streak
+ streakBoosterBonusMin: 1 # Min extra you can get from being a server booster
+ streakBoosterBonusMax: 5 # Max you can get when being a server booster
+
+# Leaderboard System
+leaderboard:
+ update_interval: 300  # Update leaderboard every 5 minutes
+ display_limit: 10  
+
+# Bot Status
+botStatus:
+  status: "WATCHING" # Status type. Available: PLAYING | WATCHING | LISTENING | COMPETING | STREAMING
+  refreshTime: 300 # How often the status updates in seconds
+  statusText: 
+   - "{users} users"
+
+# Introduction System
+# Note: The fields for the introduction are hardcoded -> See main bot introduction handler | introductionInteraction | intropanel
+introduction:
+  embedColor: "#fd5e96"
+  threadDuration: 1440  # The timeout for the thread that is created when the introduction embed is created

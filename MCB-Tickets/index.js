@@ -2,6 +2,7 @@ const { ChannelType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle 
 const dns = require('dns');
 const ticketHandler = require('./ticketHandler'); // Internal handler
 
+
 function initialize(client, config) {
     dns.setDefaultResultOrder('ipv4first');
     dns.setServers(['8.8.8.8', '1.1.1.1']);
@@ -23,6 +24,21 @@ async function handleInteraction(interaction, client) {
         return true;
     }
 
+    // Handle buttons created by individual ticket handlers
+    if (interaction.customId && interaction.customId.includes(':')) {
+        const [handlerName] = interaction.customId.split(':');
+        const handlerPath = `./handlers/${handlerName}.js`;
+
+        try {
+            const handler = require(handlerPath);
+            if (handler && typeof handler.handleInteraction === 'function') {
+                return await handler.handleInteraction(interaction, client);
+            }
+        } catch (error) {
+            console.error(`Error routing interaction to handler "${handlerName}":`, error);
+        }
+    }
+
     return false; // IMPORTANT: Signal that this interaction is not for us
 }
 
@@ -41,7 +57,7 @@ const eventHandlers = {
                 await channel.send({ embeds: [embed], components: [row] });
             }
         }
-    }
+    },
 };
 
 module.exports = {

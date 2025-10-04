@@ -23,9 +23,32 @@ module.exports = {
     const firstMessage = (await interaction.channel.messages.fetch({ limit: 1, after: 1 })).first();
     const minecraftUsername = firstMessage.embeds[0]?.fields?.find(f => f.name === 'Minecraft Username')?.value;
 
-    if (!minecraftUsername) {
+      if (!minecraftUsername)
+      {
       return interaction.reply({ content: 'Could not find Minecraft username in ticket.', ephemeral: true });
-    }
+      }
+
+      // Get the account type
+      const minecraftType = firstMessage.embeds[0]?.fields?.find(f => f.name === 'Account Type')?.value;
+
+      if (!minecraftType)
+      {
+          return interaction.reply({ content: 'Could not find Account Type in the ticket. Did the user already select it?', ephemeral: true });
+      }
+
+      let isAccountValid = false;
+      const type = minecraftType.toLowerCase(); // Use lowercase for safe comparison
+
+      if (type === 'java' || type === 'java edition') {
+          isAccountValid = await validateJavaAccount(minecraftUsername);
+      } else if (type === 'bedrock' || type === 'bedrock edition') {
+          isAccountValid = await validateBedrockAccount(minecraftUsername);
+      }
+
+      if (!isAccountValid) {
+          return interaction.reply({ content: `❌ **Verification Failed!** The ${minecraftType} account **${minecraftUsername}** could not be found. The application has not been accepted.`, ephemeral: true });
+      }
+
 
     // Add role and set nickname
       await member.roles.add(client.config.roles.whitelistRole);
@@ -76,3 +99,35 @@ Have fun! Look forward to seeing you online! 🎮`);
     await interaction.reply({ content: 'Whitelist application accepted successfully!', ephemeral: true });
   },
 };
+
+// Helper function to validate a Java Edition username
+async function validateJavaAccount(username) {
+    try {
+        const response = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
+        // If the API returns a 204 No Content, it means the user doesn't exist.
+        if (response.status === 204) {
+            return false;
+        }
+        const data = await response.json();
+        // A valid user will have an 'id' property.
+        return !!data.id;
+    } catch (error) {
+        console.error('Error validating Java account:', error);
+        return false; // Assume invalid on API error
+    }
+}
+
+// Helper function to validate a Bedrock Edition username
+async function validateBedrockAccount(username) {
+    try {
+        // Bedrock usernames can have spaces, which need to be encoded in the URL.
+        const encodedUsername = encodeURIComponent(username);
+        const response = await fetch(`https://api.geysermc.org/v2/xbox/xuid/${encodedUsername}`);
+        const data = await response.json();
+        // A valid user will have an 'xuid' property.
+        return !!data.xuid;
+    } catch (error) {
+        console.error('Error validating Bedrock account:', error);
+        return false; // Assume invalid on API error
+    }
+}

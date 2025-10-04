@@ -112,18 +112,37 @@ async function shouldMuteUser(userId, client) {
 }
 
 // Mute operations
-async function addMute(userId, reason, mutedBy, duration, timestamp) {
+async function getAllActiveMutes() {
     const db = getDb();
-    if (!db) throw new Error('Database not connected');
     const collection = db.collection('mutes');
-    await collection.insertOne({
-        userId,
-        reason,
-        mutedBy,
-        duration,
-        timestamp,
-        expiresAt: timestamp + (duration * 60 * 60 * 1000)
-    });
+    const now = Date.now();
+    // Find mutes that have not expired yet
+    return await collection.find({ expiresAt: { $gt: now } }).toArray();
+}
+
+async function removeMute(userId) {
+    const db = getDb();
+    const collection = db.collection('mutes');
+    await collection.deleteMany({ userId: userId });
+}
+
+async function addMute(userId, reason, mutedBy, duration, timestamp, expiresAt) {
+    const db = getDb();
+    const collection = db.collection('mutes');
+    // Use updateOne with upsert to prevent duplicate mute entries if command is run twice
+    await collection.updateOne(
+        { userId: userId },
+        {
+            $set: {
+                reason,
+                mutedBy,
+                duration,
+                timestamp,
+                expiresAt
+            }
+        },
+        { upsert: true }
+    );
 }
 
 async function getUserMutes(userId) {
@@ -253,7 +272,9 @@ module.exports = {
     shouldMuteUser,
     removeWarning,
     // Mute operations
-    addMute,
+    addMute,  
+    getAllActiveMutes, 
+    removeMute, 
     getUserMutes,
     isUserMuted,
     // Ban operations

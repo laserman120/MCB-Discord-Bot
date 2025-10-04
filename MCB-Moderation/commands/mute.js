@@ -2,6 +2,7 @@ const { SlashCommandBuilder, ContextMenuCommandBuilder, ApplicationCommandType, 
 const fs = require('fs');
 const yaml = require('js-yaml');
 const path = require('path');
+const { addMute } = require('../utils/database');
 
 // Create the slash command
 const data = new SlashCommandBuilder()
@@ -101,52 +102,32 @@ async function handleMute(interaction, client, targetUser, reason, duration) {
         // Defer the interaction first
         await interaction.deferUpdate();
 
-        const targetMember = await interaction.guild.members.fetch(targetUser.id);
-        const muteRole = interaction.guild.roles.cache.get(client.config.roles.muteRoleId);
+        const muteRole = await interaction.guild.roles.fetch(client.config.roles.muteRoleId);
 
         if (!muteRole) {
-            return interaction.editReply({
-                content: 'Mute role not found. Please check your configuration.',
-                embeds: [],
-                components: []
-            });
+            throw new Error("Mute role not found in config.");
         }
 
-        // Check if bot has permission to manage this role
-        const botMember = interaction.guild.members.cache.get(interaction.client.user.id);
-        if (!botMember.permissions.has('ManageRoles')) {
-            return interaction.editReply({
-                content: 'I do not have permission to manage roles.',
-                embeds: [],
-                components: []
-            });
-        }
+        const targetMember = await interaction.guild.members.fetch(targetUser.id);
 
-        // Check role hierarchy
-        if (muteRole.position >= botMember.roles.highest.position) {
-            return interaction.editReply({
-                content: 'I cannot assign the mute role because it is higher than or equal to my highest role. Please move the mute role below my highest role.',
-                embeds: [],
-                components: []
-            });
-        }
+        const durationHours = parseInt(duration);
+        const durationMs = durationHours * 60 * 60 * 1000;
+        const timestamp = Date.now();
+        const expiresAt = timestamp + durationMs;
 
-        if (targetMember.roles.highest.position >= botMember.roles.highest.position) {
-            return interaction.editReply({
-                content: 'I cannot mute this user because they have a role higher than or equal to my highest role.',
-                embeds: [],
-                components: []
-            });
-        }
+        // Use the native timeout function instead of roles
+        await targetMember.timeout(durationMs, reason);
 
-        // Add mute role
-        await targetMember.roles.add(muteRole);
+        await targetMember.roles.add(muteRole, `Mute applied by ${interaction.user.tag}`);
+
+        // Add the mute to the database
+        await addMute(targetUser.id, reason, interaction.user.id, durationHours, timestamp, expiresAt);
 
         // Create mute log embed
         const logEmbed = new EmbedBuilder()
             .setColor('#FFA500')
             .setTitle('User Muted')
-            .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
+            .setThumbnail(targetMember.displayAvatarURL({ dynamic: true }))
             .addFields(
                 { name: 'User muted:', value: `<@${targetUser.id}> (${targetUser.username})` },
                 { name: 'Muted by:', value: `<@${interaction.user.id}>` },
@@ -185,9 +166,9 @@ async function handleMute(interaction, client, targetUser, reason, duration) {
                     { name: 'Muted by', value: interaction.user.tag }
                 );
 
-            await targetUser.send({ embeds: [dmEmbed] });
+            await targetMember.send({ embeds: [dmEmbed] });
         } catch (dmError) {
-            console.error('Could not send DM to muted user:', dmError);
+            console.error('Could not send DM to muted user');
         }
 
         // Update interaction
@@ -196,45 +177,6 @@ async function handleMute(interaction, client, targetUser, reason, duration) {
             embeds: [],
             components: []
         });
-
-        // Set timeout to remove mute role
-        setTimeout(async () => {
-            try {
-                await targetMember.roles.remove(muteRole);
-                
-                // Send unmute DM
-                try {
-                    const unmuteEmbed = new EmbedBuilder()
-                        .setColor('#00FF00')
-                        .setTitle('Mute Expired')
-                        .setDescription(`Your mute in ${interaction.guild.name} has expired`);
-
-                    await targetUser.send({ embeds: [unmuteEmbed] });
-                } catch (dmError) {
-                    console.error('Could not send unmute DM:', dmError);
-                }
-
-                // Log unmute
-                try {
-                    const logThread = await interaction.guild.channels.fetch(client.config.threads.muteLogThreadId);
-                    const unmuteLogEmbed = new EmbedBuilder()
-                        .setColor('#00FF00')
-                        .setTitle('User has been unmuted')
-                        .setThumbnail(targetUser.displayAvatarURL({ dynamic: true }))
-                        .setDescription(`<@${interaction.client.user.id}> has unmuted <@${targetUser.id}>`)
-                        .addFields(
-                            { name: 'Timestamp', value: `<t:${Math.floor(Date.now() / 1000)}:F>` }
-                        );
-
-                    await logThread.send({ embeds: [unmuteLogEmbed] });
-                } catch (logError) {
-                    console.error('Could not send unmute log:', logError);
-                }
-            } catch (unmuteError) {
-                console.error('Error removing mute role:', unmuteError);
-            }
-        }, duration * 60 * 60 * 1000);
-
     } catch (error) {
         console.error('Error muting user:', error);
         // Ensure we have a valid interaction to respond to

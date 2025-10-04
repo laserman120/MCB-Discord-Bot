@@ -46,13 +46,10 @@ ticketCategories:
     value: 'whitelist'
     description: 'Apply to join our whitelisted Minecraft server'
     emoji: '📝'
+    handler: "handlers/whitelist.js"
     questions:
       - label: 'Minecraft Username'
         placeholder: 'Enter your Minecraft username'
-        required: true
-        answerType: 'short'
-      - label: 'Age'
-        placeholder: 'How old are you?'
         required: true
         answerType: 'short'
       - label: 'Experience'
@@ -67,6 +64,16 @@ ticketCategories:
         placeholder: "Any other details you'd like to share?"
         required: false
         answerType: 'paragraph'
+    handlerQuestions:
+      - label: 'What is your account type?'
+        placeholder: 'Choose Java or Bedrock'
+        required: true
+        answerType: 'selectMenu'
+        options:
+        - label: 'Java Edition'
+          value: 'Java'
+        - label: 'Bedrock Edition'
+          value: 'Bedrock'
 
   - label: 'Bug Report'
     channelName: 'bug-report-<username>'

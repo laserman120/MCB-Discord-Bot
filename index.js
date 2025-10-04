@@ -6,6 +6,9 @@ const db = require('./Utils/database.js');
 const loadModels = require('./Utils/loadModels.js');
 const { merge } = require('lodash');
 
+
+console.log("\n--- Made with <3 by GLaD0S ----\n")
+
 console.log('----- Preparing startup.. -----');
 // Load central configuration
 let config = yaml.load(fs.readFileSync(path.join(__dirname, 'config.yml'), 'utf8'));
@@ -23,7 +26,7 @@ if (config.bot && config.bot.botNames) {
                 // This will recursively merge nested objects and arrays.
                 merge(config, botLangConfig);
 
-                console.log(`Merged lang from '${botDir}'.`);
+                console.log(`  - Merged lang from '${botDir}'.`);
             } catch (error) {
                 console.error(`Error loading or merging lang from '${botDir}':`, error);
             }
@@ -92,11 +95,12 @@ function getCommandFiles(dir) {
 
 // --- INITIALIZE BOT ---
 async function startBot() {
-    console.log('Initializing bot...');
+    console.log('Initializing bot...\n');
 
     // Connect to the database ONCE
+    console.log('------ Connecting to DB -------');
     await db.connect(config);
-
+    console.log('-------------------------------\n');
     loadModels();
     
     console.log('------ Loading Commands -------');
@@ -166,7 +170,7 @@ async function startBot() {
 }
 
 client.once('clientReady', async () => {
-    console.log(`\nLogged in as ${client.user.tag}!`);
+    console.log(`Logged in as ${client.user.tag}!\n`);
 
     console.log('----- Command Registration ----');
     
@@ -185,17 +189,14 @@ client.once('clientReady', async () => {
     }
 
     console.log('-------------------------------\n');
-
-    console.log('Dispatching ready event to modules...');
+    console.log("-------- BOT IS READY ---------\n")
+    console.log('Dispatching ready event to modules...\n');
     for (const module of loadedModules) {
         if (module.eventHandlers && module.eventHandlers.ready) {
 
             module.eventHandlers.ready(client, config);
         }
     }
-
-    console.log("Finished loading modules and registering commands.")
-    console.log("-------- BOT IS READY ---------")
 });
 
 client.on('interactionCreate', async interaction => {

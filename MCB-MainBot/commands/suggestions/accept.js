@@ -38,8 +38,7 @@ module.exports = {
             const reason = interaction.options.getString('reason') || 'No reason provided';
 
             // Get the original message and update its embed
-            const suggestionChannel = await client.channels.fetch(client.config.channels.suggestionChannel);
-            const originalMessage = await suggestionChannel.messages.fetch(suggestion.messageId);
+            const originalMessage = await interaction.channel.fetchStarterMessage();
             const originalEmbed = originalMessage.embeds[0];
 
             const updatedEmbed = EmbedBuilder.from(originalEmbed)
@@ -73,6 +72,11 @@ module.exports = {
                 content: 'Suggestion accepted successfully!',
                 ephemeral: true
             });
+
+            const acceptedTagId = client.config.suggestionSystem.tagIds.suggestionAcceptedId;
+            if (acceptedTagId && interaction.channel.parent.availableTags.some(t => t.id === acceptedTagId)) {
+                await interaction.channel.setAppliedTags([acceptedTagId]);
+            }
 
             // Lock and archive the thread last
             if (!interaction.channel.archived) {

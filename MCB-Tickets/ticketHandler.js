@@ -1,5 +1,6 @@
-const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+﻿const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 const discordTranscripts = require('discord-html-transcripts');
+const path = require('path');
 
 const ticketHandler = {
   async countOpenTickets(guild, userId, config) {
@@ -62,9 +63,7 @@ const ticketHandler = {
     }
 
     // Generate the channel name
-    let channelName = category.channelName.replace('<username>', interaction.user.username);
-    // Remove any spaces and convert to lowercase
-    channelName = channelName.replace(/\s+/g, '-').toLowerCase();
+    let channelName = category.channelName.replace('<username>', interaction.user.username).replace(/\s+/g, '-').toLowerCase();
 
     // Create ticket channel
     const channel = await interaction.guild.channels.create({
@@ -98,22 +97,11 @@ const ticketHandler = {
       ],
     });
 
-    // Get Minecraft username for whitelist and moderator applications
-    let minecraftUsername = '';
-    if (categoryValue === 'whitelist' || categoryValue === 'modapplication') {
-      minecraftUsername = fields.getTextInputValue('question_0'); // First question is Minecraft username
-    }
-
     // Create embed with questions and answers
     const embed = new EmbedBuilder()
       .setColor(config.panelColor)
       .setTitle(`${category.label} Ticket`)
       .setDescription(`Ticket opened by ${interaction.user}`);
-
-    // Add Minecraft avatar for whitelist and moderator applications
-    if ((categoryValue === 'whitelist' || categoryValue === 'modapplication') && minecraftUsername) {
-      embed.setThumbnail(`https://mc-heads.net/head/${minecraftUsername}`);
-    }
 
     // Add fields for questions and answers
     embed.addFields(
@@ -134,6 +122,22 @@ const ticketHandler = {
     // Determine which role to ping
     const roleToPing = category.pingRole || config.roles.supportRole;
     await channel.send({ content: `<@&${roleToPing}> | ${interaction.user}`, embeds: [embed], components: [row] });
+
+      if (category.handler) {
+          try {
+              const handlerPath = path.resolve(__dirname, category.handler); // Use absolute path
+
+              const handler = require(handlerPath);
+
+              if (handler && typeof handler.execute === 'function') {
+                  // Pass the channel and the full category config to the handler
+                  await handler.execute(interaction, channel, category);
+              }
+          } catch (error) {
+              console.error(`[Ticket Handler] Error executing handler for category "${category.value}":`, error);
+              await channel.send('An error occurred while trying to load the next step for this ticket. Please contact an administrator.');
+          }
+      }
 
     // Reply to the user
     await interaction.reply({ content: config.messages.ticketCreated, ephemeral: true });

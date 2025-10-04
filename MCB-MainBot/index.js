@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const messageLogger = require('./handlers/messageLogger');
 const InteractionManager = require('./handlers/interactionManager');
 const PointsHandler = require('./handlers/pointsHandler');
 const statusHandler = require('./handlers/statusHandler');
@@ -27,14 +26,6 @@ async function handleInteraction(interaction, client) {
 const eventHandlers = {
     ready: (client, config) => {
         statusHandler.updateStatus(client, config);
-    },
-
-    messageUpdate: (oldMessage, newMessage, client, config) => {
-        messageLogger.execute('messageUpdate', oldMessage, newMessage, client, config);
-    },
-
-    messageDelete: (message, client, config) => {
-        messageLogger.execute('messageDelete', message, client, config);
     },
 
     messageCreate: (message) => {

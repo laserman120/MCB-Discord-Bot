@@ -6,7 +6,7 @@ module.exports = {
     .setDescription('Display the ticket panel'),
   async execute(interaction, client) {
     const config = client.config;
-    console.log("1")
+    
     const embed = new EmbedBuilder()
       .setColor(config.panelColor)
       .setTitle(config.panelTitle)
@@ -15,7 +15,7 @@ module.exports = {
     const dropdown = new StringSelectMenuBuilder()
       .setCustomId('create_ticket')
       .setPlaceholder(config.dropdownPlaceholder);
-    console.log("2")
+    
     config.ticketCategories.forEach(category => {
       dropdown.addOptions(
         new StringSelectMenuOptionBuilder()
@@ -25,7 +25,7 @@ module.exports = {
           .setEmoji(category.emoji)
       );
     });
-    console.log("3")
+    
     const component = new ActionRowBuilder().addComponents(dropdown);
 
     // Send the embed and dropdown to the channel

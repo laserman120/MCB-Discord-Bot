@@ -6,38 +6,31 @@ async function handleSuggestionSubmit(interaction, client, config) {
         const title = interaction.fields.getTextInputValue('suggestion-title');
         const content = interaction.fields.getTextInputValue('suggestion-content');
 
-        // Get the suggestions channel
-        const channel = await interaction.guild.channels.fetch(client.config.channels.suggestionChannel);
-        if (!channel) {
-            return await interaction.reply({
-                content: 'Suggestion channel not found!',
-                ephemeral: true
-            });
-        }
+        const channel = await client.channels.fetch(client.config.forums.suggestionForumId);
 
         // Create the suggestion embed
         const suggestionEmbed = new EmbedBuilder()
             .setColor('#5563ea')
             .setAuthor({
-                name: 'New Suggestion',
+                name: `Suggestion from ${interaction.user.tag}`,
                 iconURL: interaction.user.displayAvatarURL()
             })
             .setTitle(title)
             .setDescription(content)
-            .setFooter({ text: `Suggestion by ${interaction.user.tag}` })
             .setTimestamp();
 
-        // Send the embed with role ping and create a thread
-        const suggestionMsg = await channel.send({ 
-            content: `<@&${client.config.roles.suggestionRoleId}>`,
-            embeds: [suggestionEmbed] 
+        // Create a new post in the forum channel
+        const thread = await channel.threads.create({
+            name: title,
+            message: {
+                content: `<@&${client.config.roles.suggestionRoleId}>`,
+                embeds: [suggestionEmbed]
+            },
+            appliedTags: [client.config.suggestionSystem.tagIds.underReviewId]
         });
-        
-        // Create thread for discussion
-        const thread = await suggestionMsg.startThread({
-            name: `Discussion: ${title.substring(0, 50)}`,
-            autoArchiveDuration: 1440 // 24 hours
-        });
+
+        // Get the first message in the new post to add reactions to it
+        const suggestionMsg = await thread.fetchStarterMessage();
 
         // Add reactions from config
         await suggestionMsg.react(client.config.suggestion.upvoteEmoji);
@@ -51,16 +44,13 @@ async function handleSuggestionSubmit(interaction, client, config) {
             title: title,
             content: content,
             status: 'pending',
-            upvotes: 0,
-            downvotes: 0,
-            threadId: thread.id
+            threadId: thread.id // The thread IS the post
         });
-
         await suggestion.save();
 
-        // Reply to the user
+        // Reply to the user with a link to their new post
         await interaction.reply({
-            content: 'Your suggestion has been submitted successfully!',
+            content: `Your suggestion has been posted successfully! You can view it here: ${thread.url}`,
             ephemeral: true
         });
 
