@@ -1,6 +1,8 @@
 const { ChannelType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const dns = require('dns');
-const ticketHandler = require('./ticketHandler'); // Internal handler
+const ticketHandler = require('./ticketHandler');
+const { initializeClosureHandler } = require('./handlers/closureHandler');
+const { cancelTicketClosure } = require('./utils/database'); 
 
 
 function initialize(client, config) {
@@ -24,6 +26,32 @@ async function handleInteraction(interaction, client) {
         return true;
     }
 
+    // --- NEW BUTTON HANDLERS ---
+    if (interaction.isButton()) {
+        if (interaction.customId === 'finish:cancel') {
+            await cancelTicketClosure(interaction.channel.id);
+            // We can stop the timeout if we were tracking it, but with the DB it's not strictly necessary.
+            await interaction.message.edit({
+                embeds: [
+                    EmbedBuilder.from(interaction.message.embeds[0])
+                        .setColor('#F1C40F') // Yellow
+                        .setDescription(`Ticket closure has been cancelled by ${interaction.user}.`)
+                        .setFooter(null)
+                ],
+                components: [] // Remove buttons
+            });
+            await interaction.reply({ content: 'Ticket closure cancelled.', ephemeral: true });
+            return true;
+        }
+
+        if (interaction.customId === 'finish:close_now') {
+            await cancelTicketClosure(interaction.channel.id); // Cancel scheduled closure
+            await ticketHandler.handleCloseTicket(interaction, client, "Ticket closed manually.");
+            // No reply needed as the channel will be deleted.
+            return true;
+        }
+    }
+
     // Handle buttons created by individual ticket handlers
     if (interaction.customId && interaction.customId.includes(':')) {
         const [handlerName] = interaction.customId.split(':');
@@ -43,6 +71,10 @@ async function handleInteraction(interaction, client) {
 }
 
 const eventHandlers = {
+    ready: (client, config) => {
+        initializeClosureHandler(client);
+    },
+
     guildMemberRemove: async (member, client) => {
         const guild = member.guild;
         const config = client.config;
