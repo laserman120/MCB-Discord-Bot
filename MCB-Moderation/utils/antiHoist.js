@@ -5,7 +5,7 @@ const { addWarning, addHoistLog } = require('./database');
 const path = require('path');
 
 // Characters that typically cause hoisting
-const HOIST_CHARS = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '[', ']', '{', '}', '\\', '|', ';', ':', '"', "'", '<', '>', ',', '.', '?', '/', '`', '~'];
+const HOIST_CHARS = ['@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '[', ']', '{', '}', '\\', '|', ';', ':', '"', "'", '<', '>', ',', '.', '?', '/', '`', '~'];
 
 function isHoistedName(name) {
     return HOIST_CHARS.includes(name.charAt(0));
