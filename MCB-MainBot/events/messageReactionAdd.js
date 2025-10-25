@@ -52,8 +52,8 @@ module.exports = {
             }
 
             // Log the action with proper user mention
-            if (client.config.channels.loggingChannel) {
-                const logChannel = await guild.channels.fetch(client.config.channels.loggingChannel);
+            if (client.config.threads.generalLoggingThreadId) {
+                const logChannel = await guild.channels.fetch(client.config.threads.generalLoggingThreadId);
                 if (logChannel) {
                     const logEmbed = new EmbedBuilder()
                         .setColor(client.config.embeds.acceptedEmbed)

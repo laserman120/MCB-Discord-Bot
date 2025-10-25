@@ -92,7 +92,7 @@ module.exports = {
             await userDoc.save();
 
             // Log the action
-            const logChannel = await interaction.guild.channels.fetch(client.config.channels.loggingChannel);
+            const logChannel = await interaction.guild.channels.fetch(client.config.threads.generalLoggingThreadId);
             if (logChannel) {
                 await logChannel.send({ embeds: [logEmbed] });
             }

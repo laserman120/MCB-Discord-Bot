@@ -128,7 +128,7 @@ class InteractionManager {
         const reason = interaction.fields.getTextInputValue('report-reason');
 
         try {
-            const modChannel = await interaction.guild.channels.fetch(this.config.channels.loggingChannel);
+            const modChannel = await interaction.guild.channels.fetch(this.config.threads.generalLoggingThreadId);
             if (modChannel) {
                 await modChannel.send({
                     embeds: [{
@@ -194,8 +194,8 @@ class InteractionManager {
             });
 
             // Create log embed
-            if (this.config.channels.loggingChannel) {
-                const logChannel = await interaction.guild.channels.fetch(this.config.channels.loggingChannel);
+            if (this.config.threads.generalLoggingThreadId) {
+                const logChannel = await interaction.guild.channels.fetch(this.config.threads.generalLoggingThreadId);
                 if (logChannel) {
                     const logEmbed = new EmbedBuilder()
                         .setColor(this.config.embeds.mainColor)

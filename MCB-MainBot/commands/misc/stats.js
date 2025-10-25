@@ -64,8 +64,8 @@ module.exports = {
             });
 
             // Create and send log embed
-            if (client.config.channels.loggingChannel) {
-                const logChannel = await guild.channels.fetch(client.config.channels.loggingChannel);
+            if (client.config.threads.generalLoggingThreadId) {
+                const logChannel = await guild.channels.fetch(client.config.threads.generalLoggingThreadId);
                 if (logChannel) {
                     const logEmbed = new EmbedBuilder()
                         .setColor(client.config.embeds.mainColor)

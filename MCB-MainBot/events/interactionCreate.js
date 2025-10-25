@@ -117,7 +117,7 @@ module.exports = {
                     const reason = interaction.fields.getTextInputValue('report-reason');
 
                     try {
-                        const modChannel = await interaction.guild.channels.fetch(client.config.channels.loggingChannel);
+                        const modChannel = await interaction.guild.channels.fetch(client.config.threads.generalLoggingThreadId);
                         if (modChannel) {
                             await modChannel.send({
                                 embeds: [{
