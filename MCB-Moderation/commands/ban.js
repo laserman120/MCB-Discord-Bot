@@ -121,7 +121,7 @@ async function handleComponentInteraction(interaction, client) {
                 console.warn(`Could not send ban notification DM to ${targetUser.tag}. They may have DMs disabled.`);
             }
 
-            await interaction.guild.members.ban(targetUser.id, { reason: publicReason });
+            await interaction.guild.members.ban(targetUser.id, { deleteMessageSeconds: 604800, reason: publicReason });
 
             const addProofButton = new ButtonBuilder()
                 .setCustomId('ban:add_proof')
